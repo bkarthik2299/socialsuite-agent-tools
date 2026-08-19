@@ -16,7 +16,7 @@ Use this skill whenever the user asks to inspect, create, update, organize, or r
 
 ## First Move
 
-Call `socialsuite_whoami` before doing SocialSuite work. Confirm the active org and account in your own working context, then proceed.
+Call `socialsuite_whoami` before doing SocialSuite work. Confirm the active org, account, and API key permission in your own working context, then proceed.
 
 Use SocialSuite MCP tools directly. Do not try to click through the SocialSuite UI unless the user specifically asks for a visual check or browser-based verification.
 
@@ -64,7 +64,7 @@ For table/tool mapping, read [references/tool-map.md](references/tool-map.md) wh
 
 ## Safety
 
-SocialSuite MCP actions use the configured Hermes SocialSuite user and can affect real data. Deleting rows, committing AI artifacts, editing brand guides, and spending AI credits are real side effects.
+SocialSuite MCP actions use the configured SocialSuite API key and can affect real data. Read keys are inspection-only. Write keys can create projects, commit AI artifacts, edit brand guides, and spend AI credits.
 
 Password Vault secret handling is not a good MCP workflow yet because the browser app owns encryption behavior. Do not create or modify password vault credentials unless a dedicated vault-safe tool exists or the user provides already-encrypted payloads and explicitly accepts the risk.
 

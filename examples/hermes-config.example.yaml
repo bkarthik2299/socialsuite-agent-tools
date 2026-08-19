@@ -2,7 +2,7 @@ mcp_servers:
   socialsuite:
     command: node
     args:
-      - C:\path\to\socialsuite-agent-tools\mcp\socialsuite\dist\index.js
+      - C:\path\to\socialsuite-agent-tools\mcp\socialsuite\dist\api-key-index.js
     enabled: true
     trust: full
     timeout: 300

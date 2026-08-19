@@ -22,9 +22,9 @@ Each tester should create their own SocialSuite account or API key from **My Acc
 
 ## Current Connector Mode
 
-The current MCP connector uses a SocialSuite test/user login with Supabase Auth. Use a dedicated SocialSuite user, not your personal owner account.
+The current MCP connector uses SocialSuite Agent API Keys generated from **My Account -> Agent API Keys**.
 
-SocialSuite now supports generating Agent API Keys in My Account. The next connector version should switch from email/password auth to `SOCIALSUITE_API_KEY` once the SocialSuite API-key-authenticated action gateway is added.
+Use a `Read` key for inspection-only testing. Use a `Write` key when the agent needs to create projects, brand guides, campaigns, AI runs, notes, tasks, or content drafts.
 
 ## Install MCP Connector
 
@@ -35,14 +35,14 @@ npm run build
 cp .env.example .env
 ```
 
-Fill `.env` with the tester's own SocialSuite credentials.
+Fill `.env` with the tester's own SocialSuite API key.
 
 ## Configure Hermes
 
 Add the MCP server to Hermes:
 
 ```bash
-hermes mcp add socialsuite --command node --args "FULL_PATH_TO_REPO/mcp/socialsuite/dist/index.js"
+hermes mcp add socialsuite --command node --args "FULL_PATH_TO_REPO/mcp/socialsuite/dist/api-key-index.js"
 ```
 
 If Hermes asks whether to enable tools, choose yes.

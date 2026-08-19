@@ -9,11 +9,17 @@ const required = (name: string) => {
   return value;
 };
 
+const optional = (name: string) => process.env[name]?.trim() || '';
+
+const supabaseUrl = required('SOCIALSUITE_SUPABASE_URL').replace(/\/$/, '');
+
 export const config = {
-  supabaseUrl: required('SOCIALSUITE_SUPABASE_URL'),
-  supabaseAnonKey: required('SOCIALSUITE_SUPABASE_ANON_KEY'),
-  email: required('SOCIALSUITE_HERMES_EMAIL'),
-  password: required('SOCIALSUITE_HERMES_PASSWORD'),
+  supabaseUrl,
+  supabaseAnonKey: optional('SOCIALSUITE_SUPABASE_ANON_KEY'),
+  email: optional('SOCIALSUITE_HERMES_EMAIL'),
+  password: optional('SOCIALSUITE_HERMES_PASSWORD'),
   orgId: process.env.SOCIALSUITE_ORG_ID?.trim() || null,
   defaultLimit: Number(process.env.SOCIALSUITE_DEFAULT_LIMIT || 25),
+  apiKey: optional('SOCIALSUITE_API_KEY'),
+  agentApiUrl: optional('SOCIALSUITE_AGENT_API_URL') || `${supabaseUrl}/functions/v1/agent-api`,
 };
