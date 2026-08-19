@@ -1,0 +1,13 @@
+mcp_servers:
+  socialsuite:
+    command: node
+    args:
+      - C:\path\to\socialsuite-agent-tools\mcp\socialsuite\dist\index.js
+    enabled: true
+    trust: full
+    timeout: 300
+    connect_timeout: 60
+    supports_parallel_tool_calls: false
+    tools:
+      resources: false
+      prompts: false
