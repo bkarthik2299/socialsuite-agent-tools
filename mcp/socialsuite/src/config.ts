@@ -3,15 +3,15 @@ import { fileURLToPath } from 'node:url';
 
 dotenv.config({ path: fileURLToPath(new URL('../.env', import.meta.url)) });
 
-const required = (name: string) => {
-  const value = process.env[name]?.trim();
-  if (!value) throw new Error(`Missing required environment variable: ${name}`);
-  return value;
-};
-
 const optional = (name: string) => process.env[name]?.trim() || '';
 
-const supabaseUrl = required('SOCIALSUITE_SUPABASE_URL').replace(/\/$/, '');
+/** Public SocialSuite production Supabase host (also embedded in the web app). */
+const DEFAULT_SUPABASE_URL = 'https://xeumxanbvsfbsctbyzfx.supabase.co';
+
+const supabaseUrl = (optional('SOCIALSUITE_SUPABASE_URL') || DEFAULT_SUPABASE_URL).replace(
+  /\/$/,
+  '',
+);
 
 export const config = {
   supabaseUrl,
@@ -21,5 +21,6 @@ export const config = {
   orgId: process.env.SOCIALSUITE_ORG_ID?.trim() || null,
   defaultLimit: Number(process.env.SOCIALSUITE_DEFAULT_LIMIT || 25),
   apiKey: optional('SOCIALSUITE_API_KEY'),
-  agentApiUrl: optional('SOCIALSUITE_AGENT_API_URL') || `${supabaseUrl}/functions/v1/agent-api`,
+  agentApiUrl:
+    optional('SOCIALSUITE_AGENT_API_URL') || `${supabaseUrl}/functions/v1/agent-api`,
 };

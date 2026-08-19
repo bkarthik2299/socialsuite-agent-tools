@@ -1,3 +1,5 @@
+# MCP entry only — put SOCIALSUITE_API_KEY in mcp/socialsuite/.env (not here).
+# Production Agent API URL is defaulted in the package; no Supabase URL required.
 mcp_servers:
   socialsuite:
     command: node

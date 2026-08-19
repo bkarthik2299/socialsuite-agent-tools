@@ -1,6 +1,6 @@
 {
   "name": "socialsuite-agent-mcp",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
   "bin": {
@@ -8,8 +8,8 @@
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "start": "node dist/index.js",
-    "dev": "tsx src/index.ts",
+    "start": "node dist/api-key-index.js",
+    "dev": "tsx src/api-key-index.ts",
     "smoke": "node dist/smoke.js"
   },
   "dependencies": {
