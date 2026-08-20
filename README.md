@@ -29,6 +29,20 @@ The Hermes connector uses SocialSuite Agent API Keys from **My Account -> Agent 
 
 You only need an API key. The production Agent API URL is built into the package. Optional env overrides exist for staging/self-host.
 
+## Current Feature Coverage
+
+The API-key MCP is intended to cover the full SocialSuite workspace surface:
+
+- Account and workspace identity, profile, API keys, team members, invitations, micro-tool registry, and AI credits.
+- Projects, folders, campaigns, campaign content drafts, campaign calendar events, and AI campaign missions.
+- Tasks, custom task stages, task ordering, task comments, and read markers.
+- Notes, Feed Monitor folders/posts, Password Vault credentials, and Client Portal review workflows.
+- Brand guide setup, manual brand guide editing, brand assets, brand knowledge markdown, and visual direction analysis.
+- AI history, AI run details, custom AI agents, and AI workflow order.
+- Scoped generic table tools for advanced cases when no workflow-specific tool fits.
+
+The MCP wrapper calls the deployed SocialSuite `agent-api` Edge Function. The deployed app must include the matching expanded `agent-api` actions; otherwise the MCP will build but Hermes calls to newer tools will return `Unsupported agent action`.
+
 ## Install MCP Connector
 
 ```bash
@@ -58,6 +72,8 @@ npm run smoke
 ```
 
 Expect JSON with your user email, active org, and `apiKey.permission` (`read` or `write`).
+
+For Password Vault create/update with plain `password`, the deployed SocialSuite `agent-api` must have `VAULT_ENCRYPTION_KEY` or `VITE_VAULT_ENCRYPTION_KEY` configured to match the app. Without that, pass an already encrypted `encryptedPassword`.
 
 ## Configure Hermes
 
