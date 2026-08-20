@@ -34,10 +34,10 @@ You only need an API key. The production Agent API URL is built into the package
 The API-key MCP is intended to cover the full SocialSuite workspace surface:
 
 - Account and workspace identity, profile, API keys, team members, invitations, micro-tool registry, and AI credits.
-- Projects, folders, campaigns, campaign content drafts, campaign calendar events, and AI campaign missions.
+- Projects, folders, campaigns, campaign content drafts, generated post/ad images, campaign calendar events, and AI campaign missions.
 - Tasks, custom task stages, task ordering, task comments, and read markers.
 - Notes, Feed Monitor folders/posts, Password Vault credentials, and Client Portal review workflows.
-- Brand guide setup, manual brand guide editing, brand assets, brand knowledge markdown, and visual direction analysis.
+- Brand guide setup, manual brand guide editing, brand assets, brand knowledge markdown, visual direction analysis, and Brand Guide-aware image generation.
 - AI history, AI run details, custom AI agents, and AI workflow order.
 - Scoped generic table tools for advanced cases when no workflow-specific tool fits.
 

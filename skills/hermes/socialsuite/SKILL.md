@@ -33,6 +33,7 @@ Prefer workflow-specific tools over generic row tools:
 - Campaign AI mission: `socialsuite_start_campaign_mission`
 - AI artifact polling: `socialsuite_wait_for_ai_artifact`
 - Regular content/task/calendar/note creation: use the matching `socialsuite_create_*` tool
+- Post/ad image generation: `socialsuite_generate_content_image`
 - Tasks: `socialsuite_list_tasks`, `socialsuite_update_task`, `socialsuite_move_task`, task comment tools, and task stage tools
 - Calendar: `socialsuite_list_calendar_events`, `socialsuite_update_calendar_event`, `socialsuite_delete_calendar_event`
 - Notes: `socialsuite_list_notes`, `socialsuite_update_note`, `socialsuite_delete_note`
@@ -64,6 +65,8 @@ Do not call the lower-level `socialsuite_start_ai_mission` for Deep Work unless 
 
 When the user asks to create AI campaign output, start the mission and poll with `socialsuite_wait_for_ai_artifact` or set `waitForArtifact: true`. Show the artifact summary before committing. Commit with `socialsuite_commit_ai_artifact` only when the user clearly asks to commit or has already authorized automatic commit.
 
+When the user asks to generate images for approved posts or ads, use `socialsuite_generate_content_image` for each target social post or social ad content item. Prefer `useBrandGuide: true` unless the user explicitly asks not to use the Brand Guide. Pass `aspectRatio` when the user asks for a size or format such as square, portrait, story, reel, or landscape. Pass `visualGuide` when the user wants the image prompt/visual direction revised, and keep `updateVisualGuide: true` so SocialSuite stores the new prompt with the draft.
+
 ## Feature Coverage
 
 For detailed workflows and feature mapping, read [references/workflows.md](references/workflows.md) when planning a multi-step SocialSuite task.
@@ -72,7 +75,7 @@ For table/tool mapping, read [references/tool-map.md](references/tool-map.md) wh
 
 ## Safety
 
-SocialSuite MCP actions use the configured SocialSuite API key and can affect real data. Read keys are inspection-only. Write keys can create projects, commit AI artifacts, edit brand guides, invite people, edit portal/client-facing review flows, and spend AI credits.
+SocialSuite MCP actions use the configured SocialSuite API key and can affect real data. Read keys are inspection-only. Write keys can create projects, commit AI artifacts, generate images, edit brand guides, invite people, edit portal/client-facing review flows, and spend AI credits.
 
 Password Vault tools redact encrypted passwords by default. Only request encrypted password values when the user explicitly needs credential migration or inspection. Prefer `encryptedPassword` unless the deployed Agent API has the same vault encryption key as the app.
 

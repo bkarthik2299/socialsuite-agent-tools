@@ -14,6 +14,7 @@
 | Inspect brand guide/knowledge | `socialsuite_get_brand_bundle` |
 | Create content draft | `socialsuite_create_content_item` |
 | Manage content draft | `socialsuite_create_content_item`, `socialsuite_update_content_item`, `socialsuite_delete_content_item` |
+| Generate post/ad image | `socialsuite_generate_content_image` |
 | Manage tasks | `socialsuite_list_tasks`, `socialsuite_create_task`, `socialsuite_update_task`, `socialsuite_move_task`, `socialsuite_delete_task` |
 | Manage task comments/stages | `socialsuite_add_task_comment`, `socialsuite_delete_task_comment`, `socialsuite_mark_task_comments_read`, `socialsuite_save_task_stages` |
 | Manage calendar | `socialsuite_list_calendar_events`, `socialsuite_create_calendar_event`, `socialsuite_update_calendar_event`, `socialsuite_delete_calendar_event` |
@@ -58,6 +59,7 @@ Generic tools expose allowlisted tables, not unrestricted SQL.
 | Folders | `folders` |
 | Campaigns | `campaigns` |
 | Content | `content_items` |
+| Content media | `content_items.payload.mediaAssets`, `content_items.payload.generatedImages`, `campaign-media` storage bucket |
 | Tasks | `tasks`, `task_stages`, `task_comments`, `task_comment_reads` |
 | Calendar | `calendar_events` |
 | Notes | `notes` |

@@ -10,6 +10,7 @@ const contentItemTypeSchema = z.enum(['social-post', 'google-ad', 'social-ad', '
 const workModeSchema = z.enum(['instant', 'deep']);
 const modelPreferenceSchema = z.enum(['deepseek', 'anthropic']);
 const researchProviderSchema = z.enum(['tavily', 'perplexity']);
+const imageAspectRatioSchema = z.enum(['1:1', '4:5', '9:16', '16:9']);
 const jsonObjectSchema = z.record(z.string(), z.unknown());
 const teamRoleSchema = z.enum(['admin', 'editor', 'viewer']);
 const apiKeyPermissionSchema = z.enum(['read', 'write']);
@@ -63,7 +64,7 @@ const filterSchema = z.object({
 
 const server = new McpServer({
   name: 'socialsuite-api-key-mcp',
-  version: '0.2.0',
+  version: '0.2.1',
 });
 
 const gatewayTool = (action: string) => async (input: Record<string, unknown> = {}) =>
@@ -351,6 +352,24 @@ registerGatewayTool(
   'Update a campaign content draft payload, name, type, or status.',
   { contentItemId: z.string().min(1), updates: jsonObjectSchema },
   'update_content_item',
+);
+
+registerGatewayTool(
+  'socialsuite_generate_content_image',
+  'Generate SocialSuite post/ad image',
+  'Generate and attach image or carousel media for a social post or social ad, with optional Brand Guide, aspect ratio, logo, and visual guide updates.',
+  {
+    contentItemId: z.string().min(1),
+    visualGuide: z.string().min(12).optional(),
+    updateVisualGuide: z.boolean().default(true),
+    useBrandGuide: z.boolean().default(true),
+    brandGuideId: z.string().nullable().optional(),
+    selectedLogoId: z.string().nullable().optional(),
+    aspectRatio: imageAspectRatioSchema.default('1:1'),
+    replaceExistingImages: z.boolean().default(false),
+    context: jsonObjectSchema.default({}),
+  },
+  'generate_content_image',
 );
 
 registerGatewayTool(

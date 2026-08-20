@@ -45,6 +45,31 @@ Keep payloads type-specific:
 - Social ads: `platform`, `primaryText`, `headline`, `description`, `cta`, `destinationUrl`, `visualGuide`, `scheduledDate`
 - Blogs: `title`, `slug`, `excerpt`, `metaTitle`, `metaDescription`, `keywords`, `outline`, `publishDate`
 
+## Post And Ad Image Generation
+
+Use `socialsuite_generate_content_image` when the user asks to generate images, visuals, creatives, media, carousel slides, or ad/post artwork for a social post or social ad.
+
+The tool works on an existing `contentItemId`. If the user just approved an AI artifact, commit it first with `socialsuite_commit_ai_artifact`, then use the returned or listed content item IDs.
+
+Default behavior:
+
+- `useBrandGuide: true` unless the user explicitly says not to use the Brand Guide.
+- `updateVisualGuide: true` when passing a revised `visualGuide`.
+- `replaceExistingImages: false` so previous generated images stay in history while the newest generated media becomes the active media.
+
+Aspect ratio mapping:
+
+- Square, default feed image -> `1:1`
+- Instagram/Facebook feed portrait, tall feed creative -> `4:5`
+- Story, reel, vertical video/image creative -> `9:16`
+- Landscape, banner-like, wide creative -> `16:9`
+
+Use `visualGuide` when the user says to change the image prompt, visual direction, concept, layout, text-on-image rule, background, style, or composition. The tool stores the new visual guide on the draft.
+
+Use `brandGuideId` when the user names a specific brand guide. Otherwise the API chooses the guide attached to the project, falling back to the workspace guide. Use `selectedLogoId` only when the user asks for a specific saved logo variant.
+
+The tool charges AI image credits through the app's normal image-generation flow. If credits are low or missing, report the exact error and do not retry repeatedly.
+
 ## Brand Guides
 
 If the user provides a website and wants brand setup, do not manually insert a partial brand guide and stop. Use `socialsuite_setup_brand_from_website`.
