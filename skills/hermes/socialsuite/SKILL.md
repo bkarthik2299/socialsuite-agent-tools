@@ -33,14 +33,22 @@ Prefer workflow-specific tools over generic row tools:
 - Campaign AI mission: `socialsuite_start_campaign_mission`
 - AI artifact polling: `socialsuite_wait_for_ai_artifact`
 - Regular content/task/calendar/note creation: use the matching `socialsuite_create_*` tool
+- Tasks: `socialsuite_list_tasks`, `socialsuite_update_task`, `socialsuite_move_task`, task comment tools, and task stage tools
+- Calendar: `socialsuite_list_calendar_events`, `socialsuite_update_calendar_event`, `socialsuite_delete_calendar_event`
+- Notes: `socialsuite_list_notes`, `socialsuite_update_note`, `socialsuite_delete_note`
+- Password Vault: `socialsuite_list_vault_credentials`, `socialsuite_create_vault_credential`, `socialsuite_update_vault_credential`, `socialsuite_delete_vault_credential`
+- Feed Monitor: `socialsuite_list_feed_monitor` and matching feed folder/post tools
+- Client Portal: `socialsuite_list_client_portal` and matching portal client/feed/review/comment tools
+- Team/account/settings: `socialsuite_list_team`, invite/revoke tools, account profile tools, account API key tools, and `socialsuite_list_ai_credits`
+- AI customization/history: `socialsuite_list_ai_agents`, custom agent tools, workflow tools, and `socialsuite_delete_ai_run`
 
 Use generic table tools only when no specific workflow tool exists:
 
-- `socialsuite_list_rows`
-- `socialsuite_get_row`
-- `socialsuite_create_row`
-- `socialsuite_update_row`
-- `socialsuite_delete_rows`
+- `socialsuite_list_table_rows`
+- `socialsuite_get_table_row`
+- `socialsuite_create_table_row`
+- `socialsuite_update_table_row`
+- `socialsuite_delete_table_rows`
 
 ## Non-Negotiable Workflows
 
@@ -64,8 +72,8 @@ For table/tool mapping, read [references/tool-map.md](references/tool-map.md) wh
 
 ## Safety
 
-SocialSuite MCP actions use the configured SocialSuite API key and can affect real data. Read keys are inspection-only. Write keys can create projects, commit AI artifacts, edit brand guides, and spend AI credits.
+SocialSuite MCP actions use the configured SocialSuite API key and can affect real data. Read keys are inspection-only. Write keys can create projects, commit AI artifacts, edit brand guides, invite people, edit portal/client-facing review flows, and spend AI credits.
 
-Password Vault secret handling is not a good MCP workflow yet because the browser app owns encryption behavior. Do not create or modify password vault credentials unless a dedicated vault-safe tool exists or the user provides already-encrypted payloads and explicitly accepts the risk.
+Password Vault tools redact encrypted passwords by default. Only request encrypted password values when the user explicitly needs credential migration or inspection. Prefer `encryptedPassword` unless the deployed Agent API has the same vault encryption key as the app.
 
 After every mutation, summarize the changed feature, table/tool used, and important IDs.

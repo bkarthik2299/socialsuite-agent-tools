@@ -99,44 +99,92 @@ After starting, poll with `socialsuite_wait_for_ai_artifact` unless the user onl
 
 Use `socialsuite_create_task` for project, folder, or campaign tasks. Link as many IDs as are known.
 
-Use `socialsuite_create_calendar_event` only when a campaign ID is known. Calendar event `type` should match the campaign type.
+Use `socialsuite_list_tasks` before complex task changes so you can see custom stages, assignees, comments, and read markers.
+
+Use:
+
+- `socialsuite_update_task` to edit title, description, status, due date, links, assignee, or order.
+- `socialsuite_move_task` to move between custom stages.
+- `socialsuite_save_task_stages` to rename/reorder task columns.
+- `socialsuite_add_task_comment`, `socialsuite_delete_task_comment`, and `socialsuite_mark_task_comments_read` for task discussion.
+
+Use `socialsuite_create_calendar_event` only when a campaign ID is known. Calendar event `type` should match the campaign type. Use `socialsuite_list_calendar_events` for date range views, and update/delete tools for changes.
 
 ## Notes
 
-Use `socialsuite_create_note` for planning notes, research notes, or internal summaries. Link to `projectId` when the note belongs to a project.
+Use `socialsuite_create_note` for planning notes, research notes, or internal summaries. Link to `projectId` when the note belongs to a project. Use `socialsuite_list_notes`, `socialsuite_update_note`, and `socialsuite_delete_note` for note management.
 
 ## Feed Monitor
 
-Feed Monitor tables are available through generic row tools:
+Use dedicated Feed Monitor tools:
 
-- `feed_folders`
-- `feed_posts`
+- `socialsuite_list_feed_monitor`
+- `socialsuite_create_feed_folder`
+- `socialsuite_update_feed_folder`
+- `socialsuite_delete_feed_folder`
+- `socialsuite_create_feed_post`
+- `socialsuite_update_feed_post`
+- `socialsuite_delete_feed_post`
 
-Use these for saved inspiration and monitored posts. Keep source URLs and post metadata in the table payload fields already present in SocialSuite.
+Use these for saved inspiration and monitored posts. Store source URLs and Open Graph metadata when available.
 
 ## Client Portal
 
-Client Portal tables are available through generic row tools:
+Use dedicated Client Portal tools:
 
-- `portal_clients`
-- `portal_feeds`
-- `portal_review_posts`
-- `portal_comments`
+- `socialsuite_list_client_portal`
+- `socialsuite_create_portal_client`
+- `socialsuite_update_portal_client`
+- `socialsuite_delete_portal_client`
+- `socialsuite_create_portal_feed`
+- `socialsuite_delete_portal_feed`
+- `socialsuite_create_portal_review_post`
+- `socialsuite_update_portal_review_status`
+- `socialsuite_add_portal_comment`
+- `socialsuite_delete_portal_review_post`
 
 Be careful with portal actions because they affect client-facing review flows. Prefer reading existing rows unless the user explicitly asks to create or update portal data.
 
 ## Team And Settings
 
-Use generic row tools for org/member reads:
+Use:
 
-- `organizations`
-- `org_members`
+- `socialsuite_list_team` for members and pending invites.
+- `socialsuite_invite_team_member` to create invite links or send invite emails.
+- `socialsuite_revoke_team_invite` to revoke pending invites.
+- `socialsuite_get_account_profile` and `socialsuite_update_account_profile` for account profile fields.
+- `socialsuite_list_account_api_keys`, `socialsuite_create_account_api_key`, and `socialsuite_revoke_account_api_key` for Agent API keys.
+- `socialsuite_list_ai_credits` to check available AI credits.
+- `socialsuite_list_micro_tools` to inspect enabled micro-tools.
 
 Do not change organization roles or settings unless the user explicitly asks and the intended user/email/org is unambiguous.
 
 ## Password Vault
 
-Do not create or edit password vault credentials through generic tools. The app uses encryption behavior that is not represented by a safe MCP workflow yet. It is acceptable to say that Password Vault needs a dedicated vault-safe MCP tool before agent control.
+Use Password Vault tools, not generic table writes:
+
+- `socialsuite_list_vault_credentials`
+- `socialsuite_create_vault_credential`
+- `socialsuite_update_vault_credential`
+- `socialsuite_delete_vault_credential`
+
+By default, list results omit encrypted passwords. Only request `includeEncryptedPassword: true` when the user explicitly asks for credential migration or auditing. Creating/updating with plain `password` requires the deployed Agent API to have the same vault encryption key as the app; otherwise use `encryptedPassword`.
+
+## AI Agents And Credits
+
+Use `socialsuite_list_ai_credits` to check remaining credits. Use `socialsuite_list_ai_agents` before changing AI agents or workflows. Built-in agents cannot be deleted; custom workspace agents can be created, edited, deleted, and reordered with the dedicated AI agent tools.
+
+## Generic Tables
+
+Use generic table tools only when no workflow-specific tool fits:
+
+- `socialsuite_list_table_rows`
+- `socialsuite_get_table_row`
+- `socialsuite_create_table_row`
+- `socialsuite_update_table_row`
+- `socialsuite_delete_table_rows`
+
+Generic tools are workspace scoped by the Agent API and should still be treated as advanced tools.
 
 ## Browser Navigation
 
