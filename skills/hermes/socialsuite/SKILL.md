@@ -1,10 +1,9 @@
 ---
 name: socialsuite
-description: Use SocialSuite through the configured SocialSuite MCP tools for projects, campaigns, content, brand guides, AI missions, tasks, calendar, notes, portal review, and workspace operations.
-version: 1.0.0
-author: SocialSuite local
-platforms: [windows]
+description: Use SocialSuite MCP tools for projects, campaigns, content, brand guides, AI missions, Image Studio, task references, team membership, calendar, notes, and portal review.
 metadata:
+  version: "1.1.0"
+  author: SocialSuite
   hermes:
     tags: [socialsuite, social-media, mcp, campaigns, brand-guides]
     category: social-media
@@ -17,6 +16,8 @@ Use this skill whenever the user asks to inspect, create, update, organize, or r
 ## First Move
 
 Call `socialsuite_whoami` before doing SocialSuite work. Confirm the active org, account, and API key permission in your own working context, then proceed.
+
+Connector 0.3.0 expects `agentApiVersion: "0.3.0"` and capabilities `image-studio`, `task-attachments`, and `team-member-management`. If these are missing, older tools may still work, but the Agent API needs updating before using the new features.
 
 Use SocialSuite MCP tools directly. Do not try to click through the SocialSuite UI unless the user specifically asks for a visual check or browser-based verification.
 
@@ -34,6 +35,9 @@ Prefer workflow-specific tools over generic row tools:
 - AI artifact polling: `socialsuite_wait_for_ai_artifact`
 - Regular content/task/calendar/note creation: use the matching `socialsuite_create_*` tool
 - Post/ad image generation: `socialsuite_generate_content_image`
+- Standalone Image Studio: read [references/image-studio.md](references/image-studio.md) for image generation/editing, prompt tools, uploads, collections, favorites, and campaign drafts.
+- Task references: `socialsuite_list_task_attachments`, `socialsuite_upload_task_attachment`, and `socialsuite_set_task_attachments`; read the attachment workflow before editing reference lists.
+- Team membership: `socialsuite_update_team_member_role` and `socialsuite_remove_team_member` use membership IDs from `socialsuite_list_team`.
 - Tasks: `socialsuite_list_tasks`, `socialsuite_update_task`, `socialsuite_move_task`, task comment tools, and task stage tools
 - Calendar: `socialsuite_list_calendar_events`, `socialsuite_update_calendar_event`, `socialsuite_delete_calendar_event`
 - Notes: `socialsuite_list_notes`, `socialsuite_update_note`, `socialsuite_delete_note`
@@ -61,7 +65,7 @@ When the user asks for Deep Work, use `socialsuite_start_campaign_mission` with:
 - `modelPreference: "deepseek"` when they ask for DeepSeek
 - `researchProvider: "tavily"` when they ask for Tavily
 
-Do not call the lower-level `socialsuite_start_ai_mission` for Deep Work unless the user gives exact low-level context keys. The higher-level campaign mission tool prevents accidental Instant mode.
+Use the campaign mission tool for both Instant and Deep Work. The old session connector's `socialsuite_start_ai_mission` is not exposed by the API-key connector.
 
 When the user asks to create AI campaign output, start the mission and poll with `socialsuite_wait_for_ai_artifact` or set `waitForArtifact: true`. Show the artifact summary before committing. Commit with `socialsuite_commit_ai_artifact` only when the user clearly asks to commit or has already authorized automatic commit.
 
@@ -79,4 +83,4 @@ SocialSuite MCP actions use the configured SocialSuite API key and can affect re
 
 Password Vault tools redact encrypted passwords by default. Only request encrypted password values when the user explicitly needs credential migration or inspection. Prefer `encryptedPassword` unless the deployed Agent API has the same vault encryption key as the app.
 
-After every mutation, summarize the changed feature, table/tool used, and important IDs.
+Summarize the requested result and important IDs after completing the workflow. Never expose API keys, signed upload tokens, or temporary user sessions in summaries.

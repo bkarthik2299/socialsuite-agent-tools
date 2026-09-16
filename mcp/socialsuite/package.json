@@ -1,6 +1,6 @@
 {
   "name": "socialsuite-agent-mcp",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "private": true,
   "type": "module",
   "bin": {
@@ -10,7 +10,8 @@
     "build": "tsc -p tsconfig.json",
     "start": "node dist/api-key-index.js",
     "dev": "tsx src/api-key-index.ts",
-    "smoke": "node dist/smoke.js"
+    "smoke": "node dist/smoke.js",
+    "test": "npm run build && node --test tests/*.test.mjs"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.18.2",

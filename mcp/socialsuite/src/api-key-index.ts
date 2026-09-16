@@ -4,6 +4,7 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { z } from 'zod/v4';
 import { callAgentApi, textResult } from './gateway.js';
+import { registerExtensions } from './extensions.js';
 
 const campaignTypeSchema = z.enum(['socials', 'google-ad', 'meta-ad', 'blogs']);
 const contentItemTypeSchema = z.enum(['social-post', 'google-ad', 'social-ad', 'blog']);
@@ -64,7 +65,7 @@ const filterSchema = z.object({
 
 const server = new McpServer({
   name: 'socialsuite-api-key-mcp',
-  version: '0.2.1',
+  version: '0.3.0',
 });
 
 const gatewayTool = (action: string) => async (input: Record<string, unknown> = {}) =>
@@ -981,6 +982,8 @@ registerGatewayTool(
   { table: genericTableSchema, filters: z.array(filterSchema).min(1), limit: z.number().int().positive().max(250).default(100) },
   'delete_table_rows',
 );
+
+registerExtensions(server);
 
 const transport = new StdioServerTransport();
 await server.connect(transport);

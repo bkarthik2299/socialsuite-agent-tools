@@ -30,18 +30,15 @@
 | Commit AI artifact | `socialsuite_commit_ai_artifact` |
 | Cancel AI mission | `socialsuite_cancel_ai_mission` |
 | Delete AI history | `socialsuite_delete_ai_run` |
+| Studio library/jobs | `socialsuite_list_studio_library`, `socialsuite_get_studio_job`, `socialsuite_start_studio_job` |
+| Studio uploads | `socialsuite_upload_studio_image`, `socialsuite_prepare_studio_upload` |
+| Studio organization | `socialsuite_create_studio_collection`, `socialsuite_delete_studio_collection`, `socialsuite_favorite_studio_asset`, `socialsuite_organize_studio_asset`, `socialsuite_delete_studio_asset` |
+| Task references | `socialsuite_list_task_attachments`, `socialsuite_upload_task_attachment`, `socialsuite_prepare_task_attachment_upload`, `socialsuite_set_task_attachments` |
+| Team membership | `socialsuite_update_team_member_role`, `socialsuite_remove_team_member` |
 
 ## Generic Tools
 
-Use these only when a preferred tool does not fit:
-
-- `socialsuite_list_rows`
-- `socialsuite_get_row`
-- `socialsuite_create_row`
-- `socialsuite_update_row`
-- `socialsuite_delete_rows`
-
-In API-key mode, use the newer scoped generic tools:
+Use these scoped API-key tools only when a preferred tool does not fit:
 
 - `socialsuite_list_table_rows`
 - `socialsuite_get_table_row`
@@ -73,7 +70,7 @@ Generic tools expose allowlisted tables, not unrestricted SQL.
 
 ## AI Context Keys
 
-`socialsuite_start_campaign_mission` handles these for you. If using low-level `socialsuite_start_ai_mission`, include:
+`socialsuite_start_campaign_mission` handles these for you. The old session connector's `socialsuite_start_ai_mission` is not available in API-key mode. The campaign tool generates context such as:
 
 ```json
 {

@@ -66,7 +66,7 @@ Aspect ratio mapping:
 
 Use `visualGuide` when the user says to change the image prompt, visual direction, concept, layout, text-on-image rule, background, style, or composition. The tool stores the new visual guide on the draft.
 
-Use `brandGuideId` when the user names a specific brand guide. Otherwise the API chooses the guide attached to the project, falling back to the workspace guide. Use `selectedLogoId` only when the user asks for a specific saved logo variant.
+Use `brandGuideId` when the user names a specific brand guide. Otherwise the API chooses the guide attached to the project, falling back only to a workspace-wide guide (`project_id` is null), never another project's guide. Use `selectedLogoId` only when the user asks for a specific saved logo variant.
 
 The tool charges AI image credits through the app's normal image-generation flow. If credits are low or missing, report the exact error and do not retry repeatedly.
 
@@ -210,6 +210,20 @@ Use generic table tools only when no workflow-specific tool fits:
 - `socialsuite_delete_table_rows`
 
 Generic tools are workspace scoped by the Agent API and should still be treated as advanced tools.
+
+## Task reference attachments
+
+Create the task first, then read `socialsuite_list_task_attachments` for its references and `updatedAt`. Use `socialsuite_upload_task_attachment` with `taskId` and absolute local `filePath`. The file is uploaded but not yet attached. Append the returned `attachment` to the current list and call `socialsuite_set_task_attachments` with `expectedUpdatedAt` from the read. Preserve existing references. Each file must be nonempty and at most 10 MB; a task allows 12 references.
+
+For other clients, use `socialsuite_prepare_task_attachment_upload`, upload bytes to its signed URL, then save the returned metadata. Do not persist signed URLs or tokens. To remove a reference, save the latest list without the requested entry; this detaches it without deleting stored bytes. On a concurrency conflict, reread and merge the requested change before retrying. Reads return fresh one-hour signed URLs.
+
+## Team role changes and removal
+
+Read `socialsuite_list_team` and identify the intended member using their email/name. Pass the membership `id` as `memberId`, not `userId`. `socialsuite_update_team_member_role` accepts `admin`, `editor`, or `viewer`. `socialsuite_remove_team_member` removes workspace membership. Both require an admin account with a write API key. The app rejects self role changes and self removal. Do not use generic `org_members` writes.
+
+## Standalone Image Studio
+
+Read [image-studio.md](image-studio.md) for generation, reference uploads, image edits, prompt tools, job polling, collections, favorites, and campaign draft placement.
 
 ## Browser Navigation
 
