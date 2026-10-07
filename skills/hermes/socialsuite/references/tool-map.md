@@ -5,6 +5,9 @@
 | Goal | Tool |
 | --- | --- |
 | Identify account/org | `socialsuite_whoami` |
+| Discover current models/actions | `socialsuite_get_agent_catalog` |
+| Super AI chats, research, drafts and saving | `socialsuite_super_ai_*`; see [super-ai.md](super-ai.md) |
+| Analytics clients, sources and reports | `socialsuite_analytics_*`; see [analytics.md](analytics.md) |
 | See workspace state | `socialsuite_workspace_overview` |
 | Create/find project | `socialsuite_ensure_project` |
 | Create/find folder | `socialsuite_ensure_folder` |

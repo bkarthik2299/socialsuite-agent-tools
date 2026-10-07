@@ -1,7 +1,8 @@
 import dotenv from 'dotenv';
 import { fileURLToPath } from 'node:url';
 
-dotenv.config({ path: fileURLToPath(new URL('../.env', import.meta.url)) });
+// stdout belongs exclusively to the MCP JSON-RPC transport.
+dotenv.config({ path: fileURLToPath(new URL('../.env', import.meta.url)), quiet: true });
 
 const optional = (name: string) => process.env[name]?.trim() || '';
 

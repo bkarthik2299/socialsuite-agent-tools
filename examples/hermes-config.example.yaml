@@ -6,7 +6,6 @@ mcp_servers:
     args:
       - C:\path\to\socialsuite-agent-tools\mcp\socialsuite\dist\api-key-index.js
     enabled: true
-    trust: full
     timeout: 300
     connect_timeout: 60
     supports_parallel_tool_calls: false

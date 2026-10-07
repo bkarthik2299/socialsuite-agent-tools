@@ -1,5 +1,7 @@
 # Image Studio
 
+Discover generation models with `socialsuite_get_agent_catalog` and pass the selected ID as `settings.model` to `socialsuite_start_studio_job`. Current choices include GPT Image 2, GPT Image 2.5 Flare and GPT Image 2.5 Sunburst. Omitting the model uses the app default. Keep the selected model and all settings identical when retrying the same request ID.
+
 Use Studio for standalone images, reference-image generation, background removal, upscaling, expansion, image-to-prompt, and prompt enhancement. For generating directly on an existing social post/ad, use `socialsuite_generate_content_image` instead.
 
 ## Generate or edit

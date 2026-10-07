@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "socialsuite": {
+      "command": "node",
+      "args": ["/absolute/path/to/socialsuite-agent-tools/mcp/socialsuite/dist/api-key-index.js"]
+    }
+  }
+}

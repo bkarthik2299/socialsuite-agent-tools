@@ -1,8 +1,8 @@
 ---
 name: socialsuite
-description: Use SocialSuite MCP tools for projects, campaigns, content, brand guides, AI missions, Image Studio, task references, team membership, calendar, notes, and portal review.
+description: Use SocialSuite MCP tools to manage workspace content, brand guides, Super AI chats and drafts, Analytics clients and reports, Image Studio, tasks, calendar, notes, and client reviews from Hermes or other MCP-compatible agents.
 metadata:
-  version: "1.1.0"
+  version: "1.2.0"
   author: SocialSuite
   hermes:
     tags: [socialsuite, social-media, mcp, campaigns, brand-guides]
@@ -17,7 +17,9 @@ Use this skill whenever the user asks to inspect, create, update, organize, or r
 
 Call `socialsuite_whoami` before doing SocialSuite work. Confirm the active org, account, and API key permission in your own working context, then proceed.
 
-Connector 0.3.0 expects `agentApiVersion: "0.3.0"` and capabilities `image-studio`, `task-attachments`, and `team-member-management`. If these are missing, older tools may still work, but the Agent API needs updating before using the new features.
+Tool names here are the MCP server names. Some harnesses add prefixes (for example Hermes registers `mcp_socialsuite_socialsuite_whoami`); use the discovered equivalent in your client.
+
+Connector 0.4.0 requires Agent API 0.4.0 or a compatible newer backend for its new workflows. Check capabilities for the feature you need (`super-ai`, `analytics`, `studio-model-selection`, `vault-v1-encryption`). Missing capabilities mean that feature needs a backend update; an exact version string mismatch alone is not a failure. Call `socialsuite_get_agent_catalog` to discover current model IDs and supported actions instead of guessing them.
 
 Use SocialSuite MCP tools directly. Do not try to click through the SocialSuite UI unless the user specifically asks for a visual check or browser-based verification.
 
@@ -26,6 +28,8 @@ Use SocialSuite MCP tools directly. Do not try to click through the SocialSuite 
 Prefer workflow-specific tools over generic row tools:
 
 - Workspace overview: `socialsuite_workspace_overview`
+- Super AI (the current app chat workflow): read [references/super-ai.md](references/super-ai.md) for chats, credit quotes, generation, research, draft revisions, saving, undo and sharing.
+- Analytics: read [references/analytics.md](references/analytics.md) for client setup, source connections, mapping and reports.
 - Create/find project: `socialsuite_ensure_project`
 - Create/find folder: `socialsuite_ensure_folder`
 - Create/find campaign: `socialsuite_ensure_campaign`
@@ -59,7 +63,9 @@ Use generic table tools only when no specific workflow tool exists:
 
 When the user asks to set up a brand guide from a website, use `socialsuite_setup_brand_from_website`. This tool creates/finds the project and brand guide, runs website research, compiles the knowledge base, and returns the brand bundle. After it completes, verify that the returned `knowledgeDocument` exists and is ready or contains markdown.
 
-When the user asks for Deep Work, use `socialsuite_start_campaign_mission` with:
+For Super AI or the current app AI experience, use the Super AI quote/send workflow. Super AI uses discovered model IDs, `deep: true` for Deep Work, and research providers `tavily` or `sonar` (Perplexity). The following mission settings apply only when the user wants the older campaign mission workflow.
+
+When the user asks for a legacy campaign mission in Deep Work, use `socialsuite_start_campaign_mission` with:
 
 - `workMode: "deep"`
 - `modelPreference: "deepseek"` when they ask for DeepSeek

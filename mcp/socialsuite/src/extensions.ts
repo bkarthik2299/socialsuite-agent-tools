@@ -26,6 +26,7 @@ export function registerExtensions(server: McpServer) {
     requestId: id,
     tool: z.enum(['generate', 'remove', 'upscale', 'expand', 'prompt', 'enhance']),
     settings: z.object({
+      model: z.string().min(1).optional().describe('Generation model ID from get_agent_catalog studioModels; supports GPT Image 2, 2.5 Flare and 2.5 Sunburst.'),
       prompt: z.string().max(5000).optional(), negativePrompt: z.string().max(1000).optional(),
       ratio: z.enum(['1:1', '16:9', '9:16', '4:3', '3:4', '4:5']).optional().describe('Generation supports 3:4, not 4:5. 4:5 is available for expansion.'),
       format: z.enum(['png', 'jpeg', 'webp']).optional(), count: z.number().int().min(1).max(3).optional(),

@@ -1,128 +1,101 @@
 # SocialSuite Agent Tools
 
-Private agent integration package for SocialSuite.
+The maintained MCP connector and portable SocialSuite skill for Hermes and other MCP-compatible AI harnesses.
 
-This repo contains:
+**Separate public repository:** https://github.com/bkarthik2299/socialsuite-agent-tools
 
-- `mcp/socialsuite` - local MCP server for Hermes and other MCP-compatible agents.
-- `skills/hermes/socialsuite` - Hermes skill that teaches agents how to use SocialSuite safely.
-- `examples/hermes-config.example.yaml` - example Hermes MCP configuration.
+Connector **0.4.0** exposes **135 tools**. It uses a SocialSuite Agent API key; no SocialSuite password or Supabase service key is needed.
 
-## Security Rules
+## Install
 
-Never commit:
-
-- `.env`
-- SocialSuite passwords
-- SocialSuite API keys
-- Supabase service role keys
-- generated user/session tokens
-
-Each tester should create their own SocialSuite account or API key from **My Account -> Agent API Keys**.
-
-## Current Connector Mode
-
-The Hermes connector uses SocialSuite Agent API Keys from **My Account -> Agent API Keys**.
-
-- **Read** key — inspection-only testing
-- **Write** key — create projects, brand guides, campaigns, AI runs, notes, tasks, or content drafts
-
-You only need an API key. The production Agent API URL is built into the package. Optional env overrides exist for staging/self-host.
-
-## Current Feature Coverage
-
-The API-key MCP is intended to cover the full SocialSuite workspace surface:
-
-- Account and workspace identity, profile, API keys, team members, invitations, micro-tool registry, and AI credits.
-- Projects, folders, campaigns, campaign content drafts, generated post/ad images, campaign calendar events, and AI campaign missions.
-- Tasks, custom task stages, ordering, comments, read markers, and private reference attachments.
-- AI Image Studio generation, image editing, prompt tools, uploads, job polling, collections, favorites, and campaign draft placement.
-- Admin team role changes and member removal.
-- Notes, Feed Monitor folders/posts, Password Vault credentials, and Client Portal review workflows.
-- Brand guide setup, manual brand guide editing, brand assets, brand knowledge markdown, visual direction analysis, and Brand Guide-aware image generation.
-- AI history, AI run details, custom AI agents, and AI workflow order.
-- Scoped generic table tools for advanced cases when no workflow-specific tool fits.
-
-The MCP wrapper calls the deployed SocialSuite `agent-api` Edge Function. The deployed app must include the matching expanded `agent-api` actions; otherwise the MCP will build but Hermes calls to newer tools will return `Unsupported agent action`.
-
-## Install MCP Connector
-
-Requires Node.js 20 or newer.
+Requires **Node.js 22 or newer** (22 and 24 are checked in CI).
 
 ```bash
-cd mcp/socialsuite
-npm install
+git clone https://github.com/bkarthik2299/socialsuite-agent-tools.git
+cd socialsuite-agent-tools/mcp/socialsuite
+npm ci
 npm run build
-cp .env.example .env
 ```
 
-Edit `.env` and set **only**:
+Create `mcp/socialsuite/.env` from `.env.example` and set:
 
 ```env
-SOCIALSUITE_API_KEY=ss_read_..._or_ss_write_...
+SOCIALSUITE_API_KEY=your_own_socialsuite_api_key
 ```
 
-Optional (defaults to SocialSuite production):
+Create a key in SocialSuite **My Account → Agent API Keys**, or the app's **Social Suite MCP** setup page. Read keys inspect data; write keys additionally require workspace editor/admin access. The production API URL is built in. Use `SOCIALSUITE_AGENT_API_URL` for staging/self-hosting.
 
-```env
-# SOCIALSUITE_SUPABASE_URL=https://xeumxanbvsfbsctbyzfx.supabase.co
-# SOCIALSUITE_AGENT_API_URL=https://xeumxanbvsfbsctbyzfx.supabase.co/functions/v1/agent-api
+Never commit `.env`, passwords, API keys, service-role keys or generated session tokens. Each person uses their own key. Client-provided environment variables take precedence over `.env`.
+
+## Connect your harness
+
+Run the local **stdio** MCP server with `node` and the absolute path to `mcp/socialsuite/dist/api-key-index.js`. The backend Agent API URL is an HTTP application API, not a remote MCP endpoint.
+
+### Hermes
+
+Add the entry from [examples/hermes-config.example.yaml](examples/hermes-config.example.yaml) to `~/.hermes/config.yaml`, replacing the server path. Hermes CLI registration is also available:
+
+```bash
+hermes mcp add socialsuite --command node --args "/absolute/path/to/socialsuite-agent-tools/mcp/socialsuite/dist/api-key-index.js"
 ```
 
-Verify the key:
+Copy the **entire** `skills/hermes/socialsuite` folder, including `references`, into `~/.hermes/skills/social-media/socialsuite` (or your configured Hermes skills directory). Restart the MCP connection/session after updates. Hermes may prefix tools as `mcp_socialsuite_socialsuite_*`.
+
+See the official [Hermes MCP documentation](https://hermes-agent.nousresearch.com/docs/user-guide/features/mcp/) and [skills documentation](https://hermes-agent.nousresearch.com/docs/user-guide/features/skills/) for client-specific settings.
+
+### Other MCP clients
+
+[examples/mcp-config.example.json](examples/mcp-config.example.json) shows the common `mcpServers` JSON format used by clients such as Claude Desktop and Cursor. Replace the absolute path and adapt the config location/format to your harness. Install the same complete skill folder wherever that client discovers `SKILL.md` skills. Clients without skill support can still discover and call MCP tools; load the skill instructions manually when needed. No npm package has been published; install from this repository.
+
+### Verify without changing data
 
 ```bash
 npm run smoke
 ```
 
-Expect JSON with your user email, active org, and `apiKey.permission` (`read` or `write`).
+Or ask your agent:
 
-For Password Vault create/update with plain `password`, the deployed SocialSuite `agent-api` must have `VAULT_ENCRYPTION_KEY` or `VITE_VAULT_ENCRYPTION_KEY` configured to match the app. Without that, pass an already encrypted `encryptedPassword`.
+> Use SocialSuite MCP. Identify my connected account and workspace, inspect key permission and backend capabilities, then discover the current model catalog. Do not change data or spend credits.
 
-## Configure Hermes
+`socialsuite_whoami` should report Agent API 0.4.0 or a compatible newer version, with `super-ai`, `analytics`, `studio-model-selection` and `vault-v1-encryption`. `socialsuite_get_agent_catalog` returns model IDs from the app's maintained catalogs. A missing capability means the backend needs updating; reinstalling the MCP alone cannot add backend features.
+
+## Feature coverage
+
+| Surface | Coverage |
+| --- | --- |
+| Super AI | Chats, project/brand context, history, credit estimates, paid generation, research, polling, drafts, manual/AI revisions, destinations, saving/undo, branching, sharing, pin/archive, cancel/delete, admin health |
+| Analytics | Clients, preferences, GA4/GSC/GBP/SEO connections, authorized resource discovery, mapping, reports, explicit date ranges, period comparison, refresh and disconnect |
+| Image Studio | GPT Image 2 / 2.5 Flare / 2.5 Sunburst model selection, generation, editing, prompt tools, uploads, jobs, collections, favorites and campaign draft placement |
+| Workspace | Projects, folders, campaigns, content, calendar, tasks/stages/comments/references, notes, Feed Monitor, Client Portal reviews |
+| Brand | Website setup, brand guide assets, knowledge markdown, visual analysis and brand-aware image generation |
+| Account/team | Identity/profile, API keys, members/invitations, admin role changes/removal, micro-tool registry and credits |
+| Existing AI missions | Start/poll/commit/cancel, run history, custom agents and workflow order; retained for existing mission workflows |
+| Password Vault | Metadata and credential writes; plaintext writes now use the app's authenticated AES-GCM vault format with server-only `VAULT_ENCRYPTION_KEY` |
+
+Read the [skill](skills/hermes/socialsuite/SKILL.md) for feature workflows. Super AI and Analytics preserve app permissions and private data boundaries through the same authenticated backend functions. They are not exposed through generic table access. Super AI worker and streaming endpoints are not MCP tools; poll request/thread tools instead. UI-only features such as chart layout, metric selection, Google sign-in and marketing navigation do not need MCP mutation tools. Saving campaign drafts does not publish to social networks.
+
+## Upgrade
 
 ```bash
-hermes mcp add socialsuite --command node --args "FULL_PATH_TO_REPO/mcp/socialsuite/dist/api-key-index.js"
+git pull --ff-only
+cd mcp/socialsuite
+npm ci
+npm run build
+npm test
 ```
 
-If Hermes asks whether to enable tools, choose yes.
+Recopy the complete skill folder and restart the client's MCP connection. Existing API keys remain usable. The maintained entrypoint is `dist/api-key-index.js`; `src/index.ts` and the app's `agent-connectors/hermes-mcp` directory are legacy session integrations.
 
-Then restart Hermes Desktop.
+## Backend rollout and maintenance
 
-## Install Hermes Skill
+Release 0.4.0 requires the matching `agent-api` backend from `social-suite-app`, plus the app's existing deployed Super AI, Analytics, Image Studio and database migrations. This connector change adds no database migration. Keep Agent API custom-key authentication (`verify_jwt = false`) and its own API-key validation; delegated workflows authenticate the key owner as a user and apply the app's membership checks.
 
-Copy `skills/hermes/socialsuite` into the tester's Hermes local skills folder:
+Before releasing either repository, build the connector and check against the current app checkout:
 
-```text
-%LOCALAPPDATA%\hermes\skills\social-media\socialsuite
+```bash
+npm test
+npm run check:contract -- /absolute/path/to/social-suite
+npm audit --omit=dev
 ```
 
-Restart Hermes Desktop after copying.
-
-## First Test Prompt
-
-```text
-Use the socialsuite skill and SocialSuite MCP tools. Tell me which SocialSuite account you are logged in as and list my projects.
-```
-
-## Recommended Campaign Test Prompt
-
-```text
-Use the socialsuite skill and SocialSuite MCP tools.
-
-Create a project called Swiggy. Set up the Swiggy brand guide from https://www.swiggy.com, including website research and compiled markdown knowledge base.
-
-Then start a Brief to Campaign AI mission in Deep Work mode using DeepSeek and Tavily research.
-
-After the AI artifact is ready, summarize it for me. Do not commit drafts until I approve.
-```
-
-## Connector 0.3.0 rollout
-
-Deploy the matching `agent-api` and `image-studio` Edge Functions from `social-suite-app` before using the new tools. Existing Studio and task-attachment database migrations and the current `team-invitations` function must already be installed. This update requires no new database migration. Rebuild the connector, restart the MCP client, and recopy the complete skill folder including references.
-
-`socialsuite_whoami` reports `agentApiVersion` and `capabilities` on the updated backend. Older deployments may return `Unsupported agent action`; updating the MCP alone cannot add backend functionality.
-
-Run `npm test` in `mcp/socialsuite` for an offline MCP protocol test against a mock Agent API. `npm run smoke` is an optional live identity check using your API key. Offline tests do not generate images, invite people, or spend credits.
-
-The maintained entrypoint is `dist/api-key-index.js`. `src/index.ts` is the legacy session connector and does not expose the new tools. The skill works with other MCP-compatible agents too; install its entire folder in the client's supported skill directory.
+The contract check compares every public Super AI/Analytics backend action with the Agent API allowlist and MCP tool discovery/permission annotations. It needs a local app checkout because the application repository is private. Offline MCP tests cover validation, action forwarding, model selection, errors and signed uploads; backend routing tests cover workspace scope and write gates. GitHub CI tests Node 22/24, and Dependabot proposes dependency updates. Run `npm run smoke` separately for an authenticated production identity check; tests do not generate paid output or invite people.

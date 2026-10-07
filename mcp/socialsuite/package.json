@@ -1,6 +1,6 @@
 {
   "name": "socialsuite-agent-mcp",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "private": true,
   "type": "module",
   "bin": {
@@ -11,17 +11,25 @@
     "start": "node dist/api-key-index.js",
     "dev": "tsx src/api-key-index.ts",
     "smoke": "node dist/smoke.js",
-    "test": "npm run build && node --test tests/*.test.mjs"
+    "test": "npm run build && node --test tests/*.test.mjs",
+    "check:contract": "node --import tsx scripts/check-contract.mjs"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.18.2",
-    "@supabase/supabase-js": "^2.103.1",
-    "dotenv": "^16.4.7",
-    "zod": "^3.25.76"
+    "@modelcontextprotocol/sdk": "1.32.1",
+    "@supabase/supabase-js": "2.117.3",
+    "dotenv": "18.0.6",
+    "zod": "4.6.5"
   },
   "devDependencies": {
-    "@types/node": "^22.16.5",
-    "tsx": "^4.20.5",
-    "typescript": "^5.8.3"
+    "@types/node": "22.20.5",
+    "tsx": "4.23.15",
+    "typescript": "7.0.2"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bkarthik2299/socialsuite-agent-tools.git"
   }
 }
