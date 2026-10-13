@@ -1,6 +1,8 @@
 # SocialSuite Agent Tools
 
-The maintained MCP connector and portable SocialSuite skill for Hermes and other MCP-compatible AI harnesses.
+The maintained MCP connector and portable Social Suite skill for Hermes and other MCP-compatible AI clients.
+
+[Social Suite](https://www.socialsuite.app/) is an AI-powered workspace for campaign planning, Super AI content, Image Studio, client approvals and marketing analytics. This repository connects agents to those workflows using the account owner's permissions.
 
 **Separate public repository:** https://github.com/bkarthik2299/socialsuite-agent-tools
 
@@ -88,7 +90,7 @@ Recopy the complete skill folder and restart the client's MCP connection. Existi
 
 ## Backend rollout and maintenance
 
-Release 0.4.1 requires Agent API 0.4.0 or a compatible newer backend from `social-suite-app`, plus the app's Super AI, Analytics, Image Studio and database migrations. Ads reporting requires the ads-source migration and Analytics functions from app PR #92 (merged). Prepared attachments require the attachment migration and updated Super AI function from app PR #91; that PR records backend deployment but is still separate from app `main`. Confirm the operator has rolled out attachment support before quoting files: an older Super AI backend can ignore unknown attachments. The `super-ai` capability does not identify attachment rollout. This connector change adds no database migration. Keep Agent API custom-key authentication (`verify_jwt = false`) and its own API-key validation; delegated workflows authenticate the key owner as a user and apply the app's membership checks.
+Release 0.4.1 requires Agent API 0.4.0 or a compatible newer backend from `social-suite-app`, plus the app's Super AI, Analytics, Image Studio and database migrations. Ads reporting requires the ads-source migration and Analytics functions from app PR #92 (merged). Prepared attachments require the attachment migration and updated Super AI function from app PR #91, merged into app `main` on 13 October 2026. For staging or self-hosted installations, confirm the operator has deployed the matching backend before quoting files: an older Super AI backend can ignore unknown attachments. The `super-ai` capability does not identify attachment rollout. This connector change adds no database migration. Keep Agent API custom-key authentication (`verify_jwt = false`) and its own API-key validation; delegated workflows authenticate the key owner as a user and apply the app's membership checks.
 
 Attachments are prepared payloads (`name`, original byte `size`, extracted `text`, and JPEG/PNG/WebP base64 `images`), not local file uploads. See the [Super AI reference](skills/hermes/socialsuite/references/super-ai.md) for limits and model changes. Ads reports preserve account currencies and provider attribution; see the [Analytics reference](skills/hermes/socialsuite/references/analytics.md).
 
