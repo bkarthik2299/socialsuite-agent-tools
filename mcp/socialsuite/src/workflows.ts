@@ -1,18 +1,26 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod/v4';
 import { callAgentApi, textResult } from './gateway.js';
+import { attachmentsSchema } from './attachments.js';
 
 const id = z.string().uuid();
 const conversation = { conversationId: id };
 const context = { projectId: id.nullable().optional(), brandId: id.nullable().optional() };
-const source = z.enum(['ga4', 'gsc', 'gbp', 'seo']);
+const source = z.enum(['ga4', 'gsc', 'gbp', 'google_ads', 'meta_ads', 'seo', 'instagram', 'facebook_organic', 'linkedin_organic', 'tiktok_organic', 'youtube', 'pinterest_organic', 'threads', 'x_organic']);
+const connectableSource = source;
 const period = { clientId: id, start: z.iso.date(), end: z.iso.date(), compare: z.boolean().optional() };
 
 export function registerWorkflows(server: McpServer) {
   const tool = (action: string, description: string, schema: Record<string, z.ZodType> = {}, readOnly = false) =>
     server.registerTool(`socialsuite_${action}`, {
       description, inputSchema: schema, annotations: { readOnlyHint: readOnly },
-    }, async input => textResult(await callAgentApi(action, input)));
+    }, async input => {
+      if (action === 'analytics_connect_source') {
+        if (input.source === 'seo' && !input.apiKey) throw new Error('SE Ranking requires the client\'s API key.');
+        if (input.source !== 'seo' && input.apiKey !== undefined) throw new Error('apiKey is only accepted for SE Ranking (source: seo).');
+      }
+      return textResult(await callAgentApi(action, input));
+    });
 
   tool('get_agent_catalog', 'Discover current Super AI model IDs by work mode, Studio models and available workflow actions. Use returned models instead of guessing IDs.', {}, true);
   tool('super_ai_bootstrap', 'List accessible Super AI chats, projects, brands, credits and personal chat state.', {}, true);
@@ -22,11 +30,12 @@ export function registerWorkflows(server: McpServer) {
   tool('super_ai_request', 'Poll a Super AI request, including status, stage, partial text, errors and credit settlement. Poll with a delay until succeeded, failed or canceled; never resend with a new ID after an uncertain result.', { requestId: id }, true);
   tool('super_ai_configure', 'Rename or change project/brand context of an accessible chat; context changes may be blocked while a request runs.', { ...conversation, ...context, title: z.string().trim().min(1).max(180).optional() });
   tool('super_ai_state', 'Set both personal pinned and archived state for a chat. Preserve the current value of the other flag.', { ...conversation, pinned: z.boolean(), archived: z.boolean() });
-  tool('super_ai_quote', 'Estimate credits before generation. Select a model from get_agent_catalog; deep uses Deep Work. Quote does not generate an answer. Refresh expired quotes or changed context before send.', {
+  tool('super_ai_quote', 'Estimate credits before generation. Select a model from get_agent_catalog; deep uses Deep Work. Optional attachments contain extracted text and JPEG/PNG/WebP base64 data URLs, not paths/raw documents; confirm the attachment backend rollout first. Inspect returned model because images may select a vision model. Quote does not generate an answer. Refresh expired quotes or changed context before send.', {
     ...conversation, ...context, prompt: z.string().trim().min(1).max(30000), model: z.string().min(1),
     specialist: z.enum(['auto', 'research', 'strategy', 'writing', 'google-ads', 'social', 'website']).optional(),
     deep: z.boolean().optional(), research: z.boolean().optional(), researchProvider: z.enum(['tavily', 'sonar']).optional(),
     pageUrl: z.url().optional(), artifactId: id.optional(),
+    attachments: attachmentsSchema.optional(),
   });
   tool('super_ai_send', 'Accept a Super AI quote and start generation; reserves/spends credits. Use a fresh requestId for a new request; reuse the same requestId and quoteId after an uncertain response. Poll super_ai_request.', { requestId: id, quoteId: id });
   tool('super_ai_cancel', 'Cancel the active request in a chat; provider work already performed may still cost credits.', conversation);
@@ -51,7 +60,8 @@ export function registerWorkflows(server: McpServer) {
   tool('analytics_dashboard', 'Read client reports for explicit inclusive YYYY-MM-DD dates, optionally compared with the previous period. Missing reports are queued by the app; inspect report readiness/errors before interpreting metrics.', period, true);
   tool('analytics_save_client', 'Create or update an Analytics client. Updates replace name, website, project and portal-client links; preserve links the user did not ask to change.', { clientId: id.optional(), name: z.string().trim().min(1).max(120), website: z.string().optional(), projectId: id.nullable().optional(), portalClientId: id.nullable().optional() });
   tool('analytics_client_preferences', 'Set Analytics client favorite/archive flags.', { clientId: id, favorite: z.boolean().optional(), archived: z.boolean().optional() });
-  tool('analytics_connect_source', 'Start/resume a client source connection. Return authorization URL to the user for account consent; treat it as a secret. Managed sources may return no URL. Avoid restarting after an account was shared.', { clientId: id, source, restart: z.boolean().optional() });
+  tool('analytics_connect_source', 'Connect GA4, GSC, GBP, Google/Meta Ads or organic social sources through Windsor consent. For seo, supply the client\'s SE Ranking apiKey; no Windsor consent is used. Never echo or persist the key outside provider setup. Return Windsor authorization URLs privately and avoid restarting after an account was shared.', { clientId: id, source: connectableSource, apiKey: z.string().trim().min(1).max(4096).optional(), restart: z.boolean().optional() });
+  tool('analytics_seo_credits', 'Read SE Ranking subscription API credits for an existing client-owned SEO connection. Returns quota/status and check time, never credentials. These are provider credits, separate from SocialSuite AI credits.', { clientId: id, connectionId: id }, true);
   tool('analytics_resources', 'Discover provider accounts/properties and SEO engines after user authorization. Requires a write key like the app provider-discovery workflow.', { clientId: id, connectionId: id, source, resourceId: z.string().optional() });
   tool('analytics_map', 'Map an authorized provider resource to a client and enqueue initial reports. SEO requires engineId from resources.', { clientId: id, connectionId: id, source, resourceId: z.string().min(1), engineId: z.string().optional() });
   tool('analytics_unmap', 'Deactivate an Analytics source mapping.', { mappingId: id });

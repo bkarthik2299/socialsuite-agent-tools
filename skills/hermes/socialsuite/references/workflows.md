@@ -97,7 +97,7 @@ Use `socialsuite_get_brand_bundle` to inspect:
 
 ## AI Campaign Missions
 
-For new Brief to Campaign work, use `socialsuite_start_campaign_mission`.
+For the current Super AI chat experience, read [super-ai.md](super-ai.md) and use the quote/send workflow. Use `socialsuite_start_campaign_mission` when the user requests the older Brief to Campaign mission workflow or is continuing an existing mission.
 
 Important mappings:
 
