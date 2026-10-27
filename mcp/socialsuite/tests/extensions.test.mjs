@@ -52,8 +52,10 @@ test('MCP protocol: discovery, forwarding, validation, errors and signed local u
       ['super_ai_commit', { conversationId: uuid, artifactId: uuid, saveId: uuid, destination: { projectId: uuid, folderId: uuid, campaignId: uuid, itemId: uuid, expectedUpdatedAt: '2026-10-07T12:00:00Z' } }],
       ['analytics_dashboard', { clientId: uuid, start: '2026-09-01', end: '2026-09-30', compare: true }],
       ['analytics_map', { clientId: uuid, connectionId: uuid, source: 'seo', resourceId: 'provider-account', engineId: 'engine' }],
+      ['analytics_connect_source', { clientId: uuid, source: 'seo', apiKey: 'private-test-key' }],
+      ['analytics_seo_credits', { clientId: uuid, connectionId: uuid }],
     ];
-    for (const source of ['ga4', 'gsc', 'gbp', 'google_ads', 'meta_ads']) {
+    for (const source of ['ga4', 'gsc', 'gbp', 'google_ads', 'meta_ads', 'instagram', 'facebook_organic', 'linkedin_organic', 'tiktok_organic', 'youtube', 'pinterest_organic', 'threads', 'x_organic']) {
       cases.push(['analytics_connect_source', { clientId: uuid, source }]);
       cases.push(['analytics_resources', { clientId: uuid, connectionId: uuid, source }]);
       cases.push(['analytics_map', { clientId: uuid, connectionId: uuid, source, resourceId: 'authorized-account' }]);
@@ -63,7 +65,7 @@ test('MCP protocol: discovery, forwarding, validation, errors and signed local u
       assert.ok(!result.isError, result.content[0].text);
       assert.deepEqual(calls.at(-1), { action, input });
     }
-    for (const action of ['super_ai_thread', 'super_ai_request', 'analytics_dashboard', 'get_agent_catalog']) {
+    for (const action of ['super_ai_thread', 'super_ai_request', 'analytics_dashboard', 'analytics_seo_credits', 'get_agent_catalog']) {
       assert.equal(tools.find(t => t.name === `socialsuite_${action}`).annotations.readOnlyHint, true);
     }
     for (const action of ['super_ai_quote', 'super_ai_send', 'super_ai_commit', 'analytics_refresh', 'analytics_resources']) {
@@ -75,6 +77,10 @@ test('MCP protocol: discovery, forwarding, validation, errors and signed local u
       ['analytics_dashboard', { clientId: uuid, start: 'yesterday', end: 'today' }],
       ['super_ai_state', { conversationId: uuid, pinned: true }],
       ['analytics_connect_source', { clientId: uuid, source: 'seo' }],
+      ['analytics_connect_source', { clientId: uuid, source: 'seo', apiKey: '   ' }],
+      ['analytics_connect_source', { clientId: uuid, source: 'ga4', apiKey: 'private-test-key' }],
+      ['analytics_connect_source', { clientId: uuid, source: 'instagram', apiKey: 'private-test-key' }],
+      ['analytics_seo_credits', { clientId: uuid }],
       ['analytics_map', { clientId: uuid, connectionId: uuid, source: 'facebook', resourceId: 'account' }],
       ...[
         [{ name: 'empty.txt', size: 1, text: '', images: [] }],

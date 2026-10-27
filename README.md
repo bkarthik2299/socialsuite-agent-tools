@@ -6,7 +6,7 @@ The maintained MCP connector and portable Social Suite skill for Hermes and othe
 
 **Separate public repository:** https://github.com/bkarthik2299/socialsuite-agent-tools
 
-Connector **0.4.1** exposes **135 tools**, with portable skill **1.3.0**. It uses a SocialSuite Agent API key; no SocialSuite password or Supabase service key is needed.
+Connector **0.5.0** exposes **136 tools**, with portable skill **1.4.0**. It uses a SocialSuite Agent API key; no SocialSuite password or Supabase service key is needed.
 
 ## Install
 
@@ -59,14 +59,14 @@ Or ask your agent:
 
 > Use SocialSuite MCP. Identify my connected account and workspace, inspect key permission and backend capabilities, then discover the current model catalog. Do not change data or spend credits.
 
-`socialsuite_whoami` should report Agent API 0.4.0 or a compatible newer version, with `super-ai`, `analytics`, `studio-model-selection` and `vault-v1-encryption`. `socialsuite_get_agent_catalog` returns model IDs from the app's maintained catalogs. A missing capability means the backend needs updating; reinstalling the MCP alone cannot add backend features.
+`socialsuite_whoami` should report Agent API 0.4.0 or a compatible newer version, with `super-ai`, `analytics`, `studio-model-selection` and `vault-v1-encryption`. For the new Analytics workflows, also check `analytics-social-organic`, `analytics-seranking` and `analytics-seo-credits`; `analytics` alone does not establish support. `socialsuite_get_agent_catalog` returns model IDs from the app's maintained catalogs. A missing capability means the backend needs updating; reinstalling the MCP alone cannot add backend features.
 
 ## Feature coverage
 
 | Surface | Coverage |
 | --- | --- |
 | Super AI | Chats, project/brand context, history, prepared image/document attachments on quotes, credit estimates, paid generation, research, polling, drafts, manual/AI revisions, destinations, saving/undo, branching, sharing, pin/archive, cancel/delete, admin health |
-| Analytics | Clients, preferences, GA4/GSC/GBP/Google Ads/Meta Ads via Windsor, authorized resource discovery, mapping, reports, explicit date ranges, period comparison, refresh and disconnect; legacy SEO reports retained, no new SEO connections |
+| Analytics | Clients, preferences, GA4/GSC/GBP/Google Ads/Meta Ads and eight organic social sources via Windsor; SE Ranking project/engine setup with the client's API key, SEO subscription API credits, reports, explicit dates, comparison, refresh and disconnect |
 | Image Studio | GPT Image 2 / 2.5 Flare / 2.5 Sunburst model selection, generation, editing, prompt tools, uploads, jobs, collections, favorites and campaign draft placement |
 | Workspace | Projects, folders, campaigns, content, calendar, tasks/stages/comments/references, notes, Feed Monitor, Client Portal reviews |
 | Brand | Website setup, brand guide assets, knowledge markdown, visual analysis and brand-aware image generation |
@@ -90,7 +90,7 @@ Recopy the complete skill folder and restart the client's MCP connection. Existi
 
 ## Backend rollout and maintenance
 
-Release 0.4.1 requires Agent API 0.4.0 or a compatible newer backend from `social-suite-app`, plus the app's Super AI, Analytics, Image Studio and database migrations. Ads reporting requires the ads-source migration and Analytics functions from app PR #92 (merged). Prepared attachments require the attachment migration and updated Super AI function from app PR #91, merged into app `main` on 13 October 2026. For staging or self-hosted installations, confirm the operator has deployed the matching backend before quoting files: an older Super AI backend can ignore unknown attachments. The `super-ai` capability does not identify attachment rollout. This connector change adds no database migration. Keep Agent API custom-key authentication (`verify_jwt = false`) and its own API-key validation; delegated workflows authenticate the key owner as a user and apply the app's membership checks.
+Release 0.5.0 adds organic social analytics, SE Ranking setup and `socialsuite_analytics_seo_credits` (136 tools), with skill 1.4.0. These features require Agent API 0.5.0 with `analytics-social-organic`, `analytics-seranking` and `analytics-seo-credits`, plus the app updates from PRs #98, #99 and #107. SE Ranking uses the client's own Project API subscription and encrypted API key; never store that key in the MCP environment or skills. Existing workflows require Agent API 0.4.0 or a compatible newer backend from `social-suite-app`, plus the app's Super AI, Analytics, Image Studio and database migrations. Ads reporting requires the ads-source migration and Analytics functions from app PR #92 (merged). Prepared attachments require the attachment migration and updated Super AI function from app PR #91, merged into app `main` on 13 October 2026. For staging or self-hosted installations, confirm the operator has deployed the matching backend before quoting files: an older Super AI backend can ignore unknown attachments. The `super-ai` capability does not identify attachment rollout. This connector change adds no database migration. Keep Agent API custom-key authentication (`verify_jwt = false`) and its own API-key validation; delegated workflows authenticate the key owner as a user and apply the app's membership checks.
 
 Attachments are prepared payloads (`name`, original byte `size`, extracted `text`, and JPEG/PNG/WebP base64 `images`), not local file uploads. See the [Super AI reference](skills/hermes/socialsuite/references/super-ai.md) for limits and model changes. Ads reports preserve account currencies and provider attribution; see the [Analytics reference](skills/hermes/socialsuite/references/analytics.md).
 
