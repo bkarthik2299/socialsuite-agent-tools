@@ -2,7 +2,7 @@
 name: socialsuite
 description: Use SocialSuite MCP tools to manage workspace content, brand guides, Super AI chats and drafts, Analytics clients and reports, Image Studio, tasks, calendar, notes, and client reviews from Hermes or other MCP-compatible agents.
 metadata:
-  version: "1.2.0"
+  version: "1.4.0"
   author: SocialSuite
   hermes:
     tags: [socialsuite, social-media, mcp, campaigns, brand-guides]
@@ -19,7 +19,7 @@ Call `socialsuite_whoami` before doing SocialSuite work. Confirm the active org,
 
 Tool names here are the MCP server names. Some harnesses add prefixes (for example Hermes registers `mcp_socialsuite_socialsuite_whoami`); use the discovered equivalent in your client.
 
-Connector 0.4.0 requires Agent API 0.4.0 or a compatible newer backend for its new workflows. Check capabilities for the feature you need (`super-ai`, `analytics`, `studio-model-selection`, `vault-v1-encryption`). Missing capabilities mean that feature needs a backend update; an exact version string mismatch alone is not a failure. Call `socialsuite_get_agent_catalog` to discover current model IDs and supported actions instead of guessing them.
+Connector 0.5.0 supports the existing workflows on Agent API 0.4.0 or a compatible newer backend. For organic social analytics, SE Ranking setup, and SEO quota reads, require the matching backend capabilities `analytics-social-organic`, `analytics-seranking`, and `analytics-seo-credits` from Agent API 0.5.0 or newer. Check capabilities for the feature you need (`super-ai`, `analytics`, `studio-model-selection`, `vault-v1-encryption`). Missing capabilities mean that feature needs a backend update; an exact version string mismatch alone is not a failure. Call `socialsuite_get_agent_catalog` to discover current model IDs and supported actions instead of guessing them. Attachments additionally require the app's attachment migration and updated Super AI function; the generic `super-ai` capability alone does not prove attachment support.
 
 Use SocialSuite MCP tools directly. Do not try to click through the SocialSuite UI unless the user specifically asks for a visual check or browser-based verification.
 
@@ -29,7 +29,7 @@ Prefer workflow-specific tools over generic row tools:
 
 - Workspace overview: `socialsuite_workspace_overview`
 - Super AI (the current app chat workflow): read [references/super-ai.md](references/super-ai.md) for chats, credit quotes, generation, research, draft revisions, saving, undo and sharing.
-- Analytics: read [references/analytics.md](references/analytics.md) for client setup, source connections, mapping and reports.
+- Analytics: read [references/analytics.md](references/analytics.md) for client setup, organic social sources, SE Ranking connections/API credits, mapping and report interpretation.
 - Create/find project: `socialsuite_ensure_project`
 - Create/find folder: `socialsuite_ensure_folder`
 - Create/find campaign: `socialsuite_ensure_campaign`

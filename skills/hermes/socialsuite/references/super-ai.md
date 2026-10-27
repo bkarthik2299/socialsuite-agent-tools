@@ -14,3 +14,13 @@ Use `socialsuite_super_ai_revise` for manual name/field edits with a new `revisi
 `socialsuite_super_ai_branch` copies history before the selected message into a new chat. `socialsuite_super_ai_state` sets both personal flags: preserve the existing pinned/archive flag not being changed. Sharing uses workspace user IDs and view/contribute/remove roles; only the owner can share or delete. Cancel stops active chat work, but work already performed may still cost credits. The app enforces chat membership and owner/contributor access on every forwarded request.
 
 A read API key can inspect accessible chats and requests. Quote creation, personal state changes and all other mutations require a write API key and workspace editor/admin access. Generic table tools do not expose Super AI private tables or worker/stream endpoints.
+
+## Images and documents
+
+Pass prepared files in `socialsuite_super_ai_quote.attachments`, each with `{name, size, text, images}`. `size` is the original file size in bytes; `text` contains extracted document content; `images` contains JPEG/PNG/WebP base64 data URLs. The connector validates and forwards these contents. It does not open local paths or parse raw PDF/Office files. Use the harness's document/image readers to prepare the contents; never substitute a file path, public URL or filename for readable content. Browser-only GIF/BMP support works by converting images to an accepted format.
+
+Limits per message: five files, 10 MB total original bytes, 60,000 text characters per file, 100,000 total text characters, 20 image pages, 4 MB per image data URL and 16 MB total encoded image data. Each attachment must have readable text or at least one image. Extract text from text/Office documents; scanned PDFs need image pages. Split larger inputs and disclose any omitted pages/content.
+
+Include attachments before requesting the quote, then send that quote ID; do not try to add or change attachments on `super_ai_send`. File changes require a new quote. Inspect the returned `model` as well as credits: image inputs or earlier image history can cause the backend to select a vision-capable Anthropic model. Tell the user when that differs from their selection, and obtain any needed spending/model approval before sending. Thread and branch responses preserve attachment history under the app's conversation permissions.
+
+Attachment support requires the additive `super_ai_attachments` migration and updated `super-ai` function (app PR #91). On an older backend, a quote can ignore unknown attachments. Confirm that rollout with the operator before quoting attachments; do not assume Agent API 0.4.0 implies support or send a paid request when support is uncertain.

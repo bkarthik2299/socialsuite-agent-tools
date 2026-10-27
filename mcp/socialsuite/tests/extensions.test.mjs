@@ -47,17 +47,25 @@ test('MCP protocol: discovery, forwarding, validation, errors and signed local u
     assert.deepEqual(calls.at(-1), { action: 'start_studio_job', input: args });
     const cases = [
       ['super_ai_quote', { conversationId: uuid, model: 'discovered/model', prompt: 'Write two posts', deep: true, researchProvider: 'sonar' }],
+      ['super_ai_quote', { conversationId: uuid, model: 'discovered/model', prompt: 'Use the attached brief', attachments: [{ name: 'brief.md', size: 42, text: 'Write a launch campaign', images: [] }, { name: 'reference.png', size: 100, text: '', images: ['data:image/png;base64,aGVsbG8='] }] }],
       ['super_ai_send', { requestId: uuid, quoteId: uuid }],
       ['super_ai_commit', { conversationId: uuid, artifactId: uuid, saveId: uuid, destination: { projectId: uuid, folderId: uuid, campaignId: uuid, itemId: uuid, expectedUpdatedAt: '2026-10-07T12:00:00Z' } }],
       ['analytics_dashboard', { clientId: uuid, start: '2026-09-01', end: '2026-09-30', compare: true }],
       ['analytics_map', { clientId: uuid, connectionId: uuid, source: 'seo', resourceId: 'provider-account', engineId: 'engine' }],
+      ['analytics_connect_source', { clientId: uuid, source: 'seo', apiKey: 'private-test-key' }],
+      ['analytics_seo_credits', { clientId: uuid, connectionId: uuid }],
     ];
+    for (const source of ['ga4', 'gsc', 'gbp', 'google_ads', 'meta_ads', 'instagram', 'facebook_organic', 'linkedin_organic', 'tiktok_organic', 'youtube', 'pinterest_organic', 'threads', 'x_organic']) {
+      cases.push(['analytics_connect_source', { clientId: uuid, source }]);
+      cases.push(['analytics_resources', { clientId: uuid, connectionId: uuid, source }]);
+      cases.push(['analytics_map', { clientId: uuid, connectionId: uuid, source, resourceId: 'authorized-account' }]);
+    }
     for (const [action, input] of cases) {
       const result = await client.callTool({ name: `socialsuite_${action}`, arguments: input });
       assert.ok(!result.isError, result.content[0].text);
       assert.deepEqual(calls.at(-1), { action, input });
     }
-    for (const action of ['super_ai_thread', 'super_ai_request', 'analytics_dashboard', 'get_agent_catalog']) {
+    for (const action of ['super_ai_thread', 'super_ai_request', 'analytics_dashboard', 'analytics_seo_credits', 'get_agent_catalog']) {
       assert.equal(tools.find(t => t.name === `socialsuite_${action}`).annotations.readOnlyHint, true);
     }
     for (const action of ['super_ai_quote', 'super_ai_send', 'super_ai_commit', 'analytics_refresh', 'analytics_resources']) {
@@ -68,6 +76,22 @@ test('MCP protocol: discovery, forwarding, validation, errors and signed local u
       ['super_ai_send', { requestId: uuid }],
       ['analytics_dashboard', { clientId: uuid, start: 'yesterday', end: 'today' }],
       ['super_ai_state', { conversationId: uuid, pinned: true }],
+      ['analytics_connect_source', { clientId: uuid, source: 'seo' }],
+      ['analytics_connect_source', { clientId: uuid, source: 'seo', apiKey: '   ' }],
+      ['analytics_connect_source', { clientId: uuid, source: 'ga4', apiKey: 'private-test-key' }],
+      ['analytics_connect_source', { clientId: uuid, source: 'instagram', apiKey: 'private-test-key' }],
+      ['analytics_seo_credits', { clientId: uuid }],
+      ['analytics_map', { clientId: uuid, connectionId: uuid, source: 'facebook', resourceId: 'account' }],
+      ...[
+        [{ name: 'empty.txt', size: 1, text: '', images: [] }],
+        [{ name: 'brief.txt', size: 1, text: 'x'.repeat(60001), images: [] }],
+        [{ name: 'brief.txt', size: 10 * 1024 * 1024 + 1, text: 'Brief', images: [] }],
+        Array.from({ length: 6 }, () => ({ name: 'brief.txt', size: 1, text: 'Brief', images: [] })),
+        Array.from({ length: 2 }, () => ({ name: 'brief.txt', size: 1, text: 'x'.repeat(50001), images: [] })),
+        [{ name: 'reference.png', size: 1, text: '', images: Array(21).fill('data:image/png;base64,aGVsbG8=') }],
+        [{ name: 'reference.png', size: 1, text: '', images: ['https://example.com/image.png'] }],
+        [{ name: 'reference.png', size: 1, text: '', images: ['data:image/gif;base64,aGVsbG8='] }],
+      ].map(attachments => ['super_ai_quote', { conversationId: uuid, model: 'discovered/model', prompt: 'Read these files', attachments }]),
     ]) assert.equal((await client.callTool({ name: `socialsuite_${action}`, arguments: input })).isError, true);
     assert.equal(calls.length, prior);
     const before = calls.length;
