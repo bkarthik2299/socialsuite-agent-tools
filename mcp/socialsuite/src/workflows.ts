@@ -6,15 +6,21 @@ import { attachmentsSchema } from './attachments.js';
 const id = z.string().uuid();
 const conversation = { conversationId: id };
 const context = { projectId: id.nullable().optional(), brandId: id.nullable().optional() };
-const source = z.enum(['ga4', 'gsc', 'gbp', 'google_ads', 'meta_ads', 'seo']);
-const connectableSource = z.enum(['ga4', 'gsc', 'gbp', 'google_ads', 'meta_ads']);
+const source = z.enum(['ga4', 'gsc', 'gbp', 'google_ads', 'meta_ads', 'seo', 'instagram', 'facebook_organic', 'linkedin_organic', 'tiktok_organic', 'youtube', 'pinterest_organic', 'threads', 'x_organic']);
+const connectableSource = source;
 const period = { clientId: id, start: z.iso.date(), end: z.iso.date(), compare: z.boolean().optional() };
 
 export function registerWorkflows(server: McpServer) {
   const tool = (action: string, description: string, schema: Record<string, z.ZodType> = {}, readOnly = false) =>
     server.registerTool(`socialsuite_${action}`, {
       description, inputSchema: schema, annotations: { readOnlyHint: readOnly },
-    }, async input => textResult(await callAgentApi(action, input)));
+    }, async input => {
+      if (action === 'analytics_connect_source') {
+        if (input.source === 'seo' && !input.apiKey) throw new Error('SE Ranking requires the client\'s API key.');
+        if (input.source !== 'seo' && input.apiKey !== undefined) throw new Error('apiKey is only accepted for SE Ranking (source: seo).');
+      }
+      return textResult(await callAgentApi(action, input));
+    });
 
   tool('get_agent_catalog', 'Discover current Super AI model IDs by work mode, Studio models and available workflow actions. Use returned models instead of guessing IDs.', {}, true);
   tool('super_ai_bootstrap', 'List accessible Super AI chats, projects, brands, credits and personal chat state.', {}, true);
@@ -54,7 +60,8 @@ export function registerWorkflows(server: McpServer) {
   tool('analytics_dashboard', 'Read client reports for explicit inclusive YYYY-MM-DD dates, optionally compared with the previous period. Missing reports are queued by the app; inspect report readiness/errors before interpreting metrics.', period, true);
   tool('analytics_save_client', 'Create or update an Analytics client. Updates replace name, website, project and portal-client links; preserve links the user did not ask to change.', { clientId: id.optional(), name: z.string().trim().min(1).max(120), website: z.string().optional(), projectId: id.nullable().optional(), portalClientId: id.nullable().optional() });
   tool('analytics_client_preferences', 'Set Analytics client favorite/archive flags.', { clientId: id, favorite: z.boolean().optional(), archived: z.boolean().optional() });
-  tool('analytics_connect_source', 'Start/resume GA4, GSC, GBP, Google Ads or Meta Ads via Windsor. Legacy SEO cannot start new connections. Return authorization URL privately for account consent. Managed sources may return no URL. Avoid restarting after an account was shared.', { clientId: id, source: connectableSource, restart: z.boolean().optional() });
+  tool('analytics_connect_source', 'Connect GA4, GSC, GBP, Google/Meta Ads or organic social sources through Windsor consent. For seo, supply the client\'s SE Ranking apiKey; no Windsor consent is used. Never echo or persist the key outside provider setup. Return Windsor authorization URLs privately and avoid restarting after an account was shared.', { clientId: id, source: connectableSource, apiKey: z.string().trim().min(1).max(4096).optional(), restart: z.boolean().optional() });
+  tool('analytics_seo_credits', 'Read SE Ranking subscription API credits for an existing client-owned SEO connection. Returns quota/status and check time, never credentials. These are provider credits, separate from SocialSuite AI credits.', { clientId: id, connectionId: id }, true);
   tool('analytics_resources', 'Discover provider accounts/properties and SEO engines after user authorization. Requires a write key like the app provider-discovery workflow.', { clientId: id, connectionId: id, source, resourceId: z.string().optional() });
   tool('analytics_map', 'Map an authorized provider resource to a client and enqueue initial reports. SEO requires engineId from resources.', { clientId: id, connectionId: id, source, resourceId: z.string().min(1), engineId: z.string().optional() });
   tool('analytics_unmap', 'Deactivate an Analytics source mapping.', { mappingId: id });

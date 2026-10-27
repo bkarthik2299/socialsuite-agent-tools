@@ -23,6 +23,11 @@ try {
       [...(action === 'analytics_connect_source' ? connectableSources : sources)].sort(),
       `${action}: Analytics source choices drifted from the app`);
   }
+  const connect = tools.find(t => t.name === 'socialsuite_analytics_connect_source').inputSchema;
+  assert.equal(connect.properties.apiKey?.type, 'string', 'SE Ranking setup must accept the client API key');
+  const credits = tools.find(t => t.name === 'socialsuite_analytics_seo_credits');
+  assert.ok(credits, 'SE Ranking subscription credits need an MCP tool');
+  assert.deepEqual([...credits.inputSchema.required].sort(), ['clientId', 'connectionId']);
   const attachmentFile = resolve(app, 'supabase/functions/_shared/super_ai_attachments.ts');
   let attachmentValidator;
   try { await readFile(attachmentFile); attachmentValidator = await import(pathToFileURL(attachmentFile).href); }
