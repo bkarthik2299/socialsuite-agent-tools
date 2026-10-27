@@ -66,7 +66,7 @@ const filterSchema = z.object({
 
 const server = new McpServer({
   name: 'socialsuite-api-key-mcp',
-  version: '0.5.0',
+  version: '0.5.1',
 });
 
 const gatewayTool = (action: string) => async (input: Record<string, unknown> = {}) =>
