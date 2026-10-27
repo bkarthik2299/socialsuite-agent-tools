@@ -6,7 +6,7 @@ The maintained MCP connector and portable Social Suite skill for Hermes and othe
 
 **Separate public repository:** https://github.com/bkarthik2299/socialsuite-agent-tools
 
-Connector **0.5.0** exposes **136 tools**, with portable skill **1.4.0**. It uses a SocialSuite Agent API key; no SocialSuite password or Supabase service key is needed.
+Connector **0.5.1** exposes **136 tools**, with portable skill **1.4.0**. It uses a SocialSuite Agent API key; no SocialSuite password or Supabase service key is needed.
 
 ## Install
 
@@ -77,6 +77,8 @@ Or ask your agent:
 Read the [skill](skills/hermes/socialsuite/SKILL.md) for feature workflows. Super AI and Analytics preserve app permissions and private data boundaries through the same authenticated backend functions. They are not exposed through generic table access. Super AI worker and streaming endpoints are not MCP tools; poll request/thread tools instead. UI-only features such as chart layout, metric selection, Google sign-in and marketing navigation do not need MCP mutation tools. Saving campaign drafts does not publish to social networks.
 
 ## Upgrade
+
+Release 0.5.1 includes the current connector dependency updates and GitHub Actions v7. The 136 tools, skill 1.4.0, API-key setup and backend requirements are unchanged from 0.5.0.
 
 ```bash
 git pull --ff-only
