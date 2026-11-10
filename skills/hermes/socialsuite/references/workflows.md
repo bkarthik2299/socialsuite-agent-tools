@@ -133,6 +133,12 @@ Use:
 - `socialsuite_save_task_stages` to rename/reorder task columns.
 - `socialsuite_add_task_comment`, `socialsuite_delete_task_comment`, and `socialsuite_mark_task_comments_read` for task discussion.
 
+For card edits, require backend capability `task-card-updates`. Use `members[].userId` from `socialsuite_list_tasks` as `assigneeId`; the separate `id` identifies the workspace membership. The backend also resolves membership IDs within the active workspace. Do not guess a person's ID or pass their display name. Project, folder and campaign fields also take IDs from workspace/context tools.
+
+Example: `socialsuite_update_task({"taskId":"<task-id>","updates":{"assigneeId":"<member-user-id>","projectId":"<project-id>","dueDate":"2026-11-15"}})`. Editable fields are `title`, `description`, `status` (stage ID, including custom stages), `dueDate`, `projectId`, `folderId`, `campaignId`, `assigneeId`, and `sortOrder`. Snake_case aliases and top-level editable fields are also supported. Omitted fields stay unchanged; `null` or an empty string clears optional fields. Dates must be real `YYYY-MM-DD` calendar dates. Never send empty updates or unknown field names.
+
+Selecting a campaign fills its folder and project; selecting a folder fills its project and clears the previous campaign. Selecting only a project clears folder/campaign links. Supply matching parent and child IDs together when retaining a specific hierarchy. Conflicting links are rejected. Read the returned task and verify the requested attributes; do not report success from an HTTP status alone. Deleting tasks and replacing stages use the app's private 30-day recovery behavior.
+
 Use `socialsuite_create_calendar_event` only when a campaign ID is known. Calendar event `type` should match the campaign type. Use `socialsuite_list_calendar_events` for date range views, and update/delete tools for changes.
 
 ## Notes

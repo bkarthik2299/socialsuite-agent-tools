@@ -50,6 +50,8 @@ Use authorized account discovery, not public handles or invented resource IDs. A
 4. Poll `socialsuite_analytics_dashboard` for the requested completed-day range. Quota/temporary failures use the existing report queue. An invalid key requires reconnecting; do not retry indefinitely or invent another provider grant.
 5. When asked about provider quota, require `analytics-seo-credits`, then call `socialsuite_analytics_seo_credits` with this client's `clientId` and `connectionId`. Report `remaining`, `limit`, `used`, `status`, `expiresOn` and `checkedAt` as returned; null means unavailable. These are SE Ranking subscription API credits, separate from SocialSuite AI credits. A read key can inspect an existing connection's quota without receiving its key. Do not poll quota repeatedly.
 
+For website audit drilldowns, use `socialsuite_analytics_seo_audit_details` with `mappingId` and `reportId` from the dashboard. Page through URLs with `offset`; use a returned check's `issueCode` for affected URLs or a returned `urlId` for per-page snippets. Keep the mapping and report together. Older backends without this action need the updated Agent API; do not fall back to generic credential tables.
+
 If capabilities are absent, explain that the matching app backend must be deployed. Do not send a customer's key to an older backend that may ignore unknown fields. Disconnect uses the existing Analytics tool and does not revoke the client's key at SE Ranking.
 
 ## SEO report interpretation

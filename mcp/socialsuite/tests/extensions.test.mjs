@@ -42,10 +42,17 @@ test('MCP protocol: discovery, forwarding, validation, errors and signed local u
       assert.ok(tools.some(t => t.name === `socialsuite_${name}`), name);
     }
     assert.equal(tools.find(t => t.name === 'socialsuite_get_studio_job').annotations.readOnlyHint, true);
+    const taskSchema = tools.find(t => t.name === 'socialsuite_update_task').inputSchema;
+    assert.ok(taskSchema.properties.updates.properties.assigneeId.description.includes('userId'));
+    assert.ok(taskSchema.properties.updates.properties.projectId);
+    assert.ok(taskSchema.properties.updates.properties.dueDate);
     const args = { requestId: uuid, tool: 'generate', settings: { model: 'openai/gpt-image-2.5-flare', prompt: 'A red bicycle', ratio: '3:4', count: 2 } };
     await client.callTool({ name: 'socialsuite_start_studio_job', arguments: args });
     assert.deepEqual(calls.at(-1), { action: 'start_studio_job', input: args });
     const cases = [
+      ['update_task', { taskId: uuid, updates: { assigneeId: uuid, projectId: uuid, dueDate: '2026-11-15', status: 'custom-stage' } }],
+      ['update_task', { taskId: uuid, assignee_id: null, due_date: '', folder_id: null }],
+      ['create_task', { title: 'Assigned card', assigneeId: uuid, campaignId: uuid, dueDate: '2026-11-15', status: 'todo' }],
       ['super_ai_quote', { conversationId: uuid, model: 'discovered/model', prompt: 'Write two posts', deep: true, researchProvider: 'sonar' }],
       ['super_ai_quote', { conversationId: uuid, model: 'discovered/model', prompt: 'Use the attached brief', attachments: [{ name: 'brief.md', size: 42, text: 'Write a launch campaign', images: [] }, { name: 'reference.png', size: 100, text: '', images: ['data:image/png;base64,aGVsbG8='] }] }],
       ['super_ai_send', { requestId: uuid, quoteId: uuid }],
@@ -54,6 +61,7 @@ test('MCP protocol: discovery, forwarding, validation, errors and signed local u
       ['analytics_map', { clientId: uuid, connectionId: uuid, source: 'seo', resourceId: 'provider-account', engineId: 'engine' }],
       ['analytics_connect_source', { clientId: uuid, source: 'seo', apiKey: 'private-test-key' }],
       ['analytics_seo_credits', { clientId: uuid, connectionId: uuid }],
+      ['analytics_seo_audit_details', { mappingId: uuid, reportId: uuid, offset: 100, issueCode: 'broken_links', urlId: '123' }],
     ];
     for (const source of ['ga4', 'gsc', 'gbp', 'google_ads', 'meta_ads', 'instagram', 'facebook_organic', 'linkedin_organic', 'tiktok_organic', 'youtube', 'pinterest_organic', 'threads', 'x_organic']) {
       cases.push(['analytics_connect_source', { clientId: uuid, source }]);
@@ -65,7 +73,7 @@ test('MCP protocol: discovery, forwarding, validation, errors and signed local u
       assert.ok(!result.isError, result.content[0].text);
       assert.deepEqual(calls.at(-1), { action, input });
     }
-    for (const action of ['super_ai_thread', 'super_ai_request', 'analytics_dashboard', 'analytics_seo_credits', 'get_agent_catalog']) {
+    for (const action of ['super_ai_thread', 'super_ai_request', 'analytics_dashboard', 'analytics_seo_credits', 'analytics_seo_audit_details', 'get_agent_catalog']) {
       assert.equal(tools.find(t => t.name === `socialsuite_${action}`).annotations.readOnlyHint, true);
     }
     for (const action of ['super_ai_quote', 'super_ai_send', 'super_ai_commit', 'analytics_refresh', 'analytics_resources']) {
@@ -73,6 +81,11 @@ test('MCP protocol: discovery, forwarding, validation, errors and signed local u
     }
     const prior = calls.length;
     for (const [action, input] of [
+      ['update_task', { taskId: uuid, updates: { assignedTo: uuid } }],
+      ['update_task', { taskId: uuid, updates: {} }],
+      ['update_task', { taskId: uuid, updates: { dueDate: '2026-02-30' } }],
+      ['update_task', { taskId: uuid, dueDate: 'tomorrow' }],
+      ['update_task', { taskId: uuid, updates: { sortOrder: 1.5 } }],
       ['super_ai_send', { requestId: uuid }],
       ['analytics_dashboard', { clientId: uuid, start: 'yesterday', end: 'today' }],
       ['super_ai_state', { conversationId: uuid, pinned: true }],
@@ -81,6 +94,8 @@ test('MCP protocol: discovery, forwarding, validation, errors and signed local u
       ['analytics_connect_source', { clientId: uuid, source: 'ga4', apiKey: 'private-test-key' }],
       ['analytics_connect_source', { clientId: uuid, source: 'instagram', apiKey: 'private-test-key' }],
       ['analytics_seo_credits', { clientId: uuid }],
+      ['analytics_seo_audit_details', { mappingId: uuid }],
+      ['analytics_seo_audit_details', { mappingId: uuid, reportId: uuid, offset: -1 }],
       ['analytics_map', { clientId: uuid, connectionId: uuid, source: 'facebook', resourceId: 'account' }],
       ...[
         [{ name: 'empty.txt', size: 1, text: '', images: [] }],
