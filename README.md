@@ -6,7 +6,7 @@ The maintained MCP connector and portable Social Suite skill for Hermes and othe
 
 **Separate public repository:** https://github.com/bkarthik2299/socialsuite-agent-tools
 
-Connector **0.5.1** exposes **136 tools**, with portable skill **1.4.0**. It uses a SocialSuite Agent API key; no SocialSuite password or Supabase service key is needed.
+Connector **0.5.2** exposes **137 tools**, with portable skill **1.4.1**. It uses a SocialSuite Agent API key; no SocialSuite password or Supabase service key is needed.
 
 ## Install
 
@@ -78,7 +78,7 @@ Read the [skill](skills/hermes/socialsuite/SKILL.md) for feature workflows. Supe
 
 ## Upgrade
 
-Release 0.5.1 includes the current connector dependency updates and GitHub Actions v7. The 136 tools, skill 1.4.0, API-key setup and backend requirements are unchanged from 0.5.0.
+Release 0.5.2 adds explicit task-card edit schemas for assignee, project, folder, campaign, date, stage and ordering, including snake_case aliases and top-level edits. Agent API 0.5.1 capability `task-card-updates` resolves member IDs, validates dates and workspace access, supports clearing fields, and keeps project/folder/campaign links consistent. The `task-recovery` capability reflects the app's private 30-day recovery behavior. The new read-only `socialsuite_analytics_seo_audit_details` tool exposes the app's latest paginated SE Ranking audit drilldowns. Update the backend and restart the MCP connection after updating the connector so clients refresh their tool schemas.
 
 ```bash
 git pull --ff-only

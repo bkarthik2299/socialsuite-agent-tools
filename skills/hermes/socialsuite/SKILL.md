@@ -2,7 +2,7 @@
 name: socialsuite
 description: Use SocialSuite MCP tools to manage workspace content, brand guides, Super AI chats and drafts, Analytics clients and reports, Image Studio, tasks, calendar, notes, and client reviews from Hermes or other MCP-compatible agents.
 metadata:
-  version: "1.4.0"
+  version: "1.4.1"
   author: SocialSuite
   hermes:
     tags: [socialsuite, social-media, mcp, campaigns, brand-guides]
@@ -19,7 +19,7 @@ Call `socialsuite_whoami` before doing SocialSuite work. Confirm the active org,
 
 Tool names here are the MCP server names. Some harnesses add prefixes (for example Hermes registers `mcp_socialsuite_socialsuite_whoami`); use the discovered equivalent in your client.
 
-Connector 0.5.0 supports the existing workflows on Agent API 0.4.0 or a compatible newer backend. For organic social analytics, SE Ranking setup, and SEO quota reads, require the matching backend capabilities `analytics-social-organic`, `analytics-seranking`, and `analytics-seo-credits` from Agent API 0.5.0 or newer. Check capabilities for the feature you need (`super-ai`, `analytics`, `studio-model-selection`, `vault-v1-encryption`). Missing capabilities mean that feature needs a backend update; an exact version string mismatch alone is not a failure. Call `socialsuite_get_agent_catalog` to discover current model IDs and supported actions instead of guessing them. Attachments additionally require the app's attachment migration and updated Super AI function; the generic `super-ai` capability alone does not prove attachment support.
+Connector 0.5.2 supports the existing workflows on Agent API 0.4.0 or a compatible newer backend. Card attribute edits require Agent API 0.5.1 capability `task-card-updates`; read [references/workflows.md](references/workflows.md#tasks-and-calendar) for assignment IDs, dates, clearing and project links. For organic social analytics, SE Ranking setup, and SEO quota reads, require the matching backend capabilities `analytics-social-organic`, `analytics-seranking`, and `analytics-seo-credits` from Agent API 0.5.0 or newer. Check capabilities for the feature you need (`super-ai`, `analytics`, `studio-model-selection`, `vault-v1-encryption`). Missing capabilities mean that feature needs a backend update; an exact version string mismatch alone is not a failure. Call `socialsuite_get_agent_catalog` to discover current model IDs and supported actions instead of guessing them. Attachments additionally require the app's attachment migration and updated Super AI function; the generic `super-ai` capability alone does not prove attachment support.
 
 Use SocialSuite MCP tools directly. Do not try to click through the SocialSuite UI unless the user specifically asks for a visual check or browser-based verification.
 

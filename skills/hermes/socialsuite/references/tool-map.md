@@ -13,6 +13,7 @@
 | Organic social analytics | Existing Analytics workflow with exact platform source IDs; see [analytics.md](analytics.md) |
 | SE Ranking setup and reporting | `socialsuite_analytics_connect_source` with `source: "seo"` and private `apiKey`, then resources/map/dashboard |
 | SE Ranking API quota | `socialsuite_analytics_seo_credits` with client and connection IDs; read-only |
+| SE Ranking audit drilldowns | `socialsuite_analytics_seo_audit_details` with dashboard mapping/report IDs; read-only, paginated |
 | See workspace state | `socialsuite_workspace_overview` |
 | Create/find project | `socialsuite_ensure_project` |
 | Create/find folder | `socialsuite_ensure_folder` |

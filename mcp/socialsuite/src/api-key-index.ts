@@ -6,6 +6,7 @@ import { z } from 'zod/v4';
 import { callAgentApi, textResult } from './gateway.js';
 import { registerExtensions } from './extensions.js';
 import { registerWorkflows } from './workflows.js';
+import { taskUpdateFields, taskUpdatesSchema } from './tasks.js';
 
 const campaignTypeSchema = z.enum(['socials', 'google-ad', 'meta-ad', 'blogs']);
 const contentItemTypeSchema = z.enum(['social-post', 'google-ad', 'social-ad', 'blog']);
@@ -66,7 +67,7 @@ const filterSchema = z.object({
 
 const server = new McpServer({
   name: 'socialsuite-api-key-mcp',
-  version: '0.5.1',
+  version: '0.5.2',
 });
 
 const gatewayTool = (action: string) => async (input: Record<string, unknown> = {}) =>
@@ -210,14 +211,9 @@ server.registerTool(
     title: 'Create SocialSuite task',
     description: 'Create a SocialSuite task linked to org, project, folder, or campaign.',
     inputSchema: {
+      ...taskUpdateFields,
       title: z.string().min(1),
-      description: z.string().optional(),
       status: z.string().default('todo'),
-      dueDate: z.string().nullable().optional(),
-      projectId: z.string().nullable().optional(),
-      folderId: z.string().nullable().optional(),
-      campaignId: z.string().nullable().optional(),
-      assigneeId: z.string().nullable().optional(),
     },
   },
   gatewayTool('create_task'),
@@ -396,15 +392,15 @@ registerGatewayTool(
 registerGatewayTool(
   'socialsuite_update_task',
   'Update SocialSuite task',
-  'Update task title, status, due date, links, assignee, or ordering.',
-  { taskId: z.string().min(1), updates: jsonObjectSchema },
+  'Update a task card. Pass editable fields in updates or at the top level. Omitted fields stay unchanged; null clears optional fields. Use list_tasks members[].userId for assigneeId and stage ids for status. Returns the persisted task.',
+  { taskId: z.string().min(1), ...taskUpdateFields, updates: taskUpdatesSchema.optional() },
   'update_task',
 );
 
 registerGatewayTool(
   'socialsuite_delete_task',
   'Delete SocialSuite task',
-  'Delete a task in the active workspace.',
+  'Move a task in the active workspace to its private 30-day recovery bin.',
   { taskId: z.string().min(1) },
   'delete_task',
 );
