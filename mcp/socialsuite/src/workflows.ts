@@ -22,7 +22,7 @@ export function registerWorkflows(server: McpServer) {
       return textResult(await callAgentApi(action, input));
     });
 
-  tool('get_agent_catalog', 'Discover current Super AI model IDs by work mode, Studio models and available workflow actions. Use returned models instead of guessing IDs.', {}, true);
+  tool('get_agent_catalog', 'Discover current Super AI choices (including Auto), Studio models, Reports actions and other workflow actions. Use superAiModels.choices and its default for current chats; legacyMissionModels applies only to older campaign missions. Use returned IDs instead of guessing.', {}, true);
   tool('super_ai_bootstrap', 'List accessible Super AI chats, projects, brands, credits and personal chat state.', {}, true);
   tool('super_ai_health', 'Admin only: check Super AI provider/model and recovery availability without generating content.', {}, true);
   tool('super_ai_create', 'Create a brand/project-aware Super AI chat. Does not generate content.', context);
