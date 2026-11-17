@@ -6,6 +6,7 @@ import { z } from 'zod/v4';
 import { callAgentApi, textResult } from './gateway.js';
 import { registerExtensions } from './extensions.js';
 import { registerWorkflows } from './workflows.js';
+import { registerReports } from './reports.js';
 import { taskUpdateFields, taskUpdatesSchema } from './tasks.js';
 
 const campaignTypeSchema = z.enum(['socials', 'google-ad', 'meta-ad', 'blogs']);
@@ -67,13 +68,14 @@ const filterSchema = z.object({
 
 const server = new McpServer({
   name: 'socialsuite-api-key-mcp',
-  version: '0.5.2',
+  version: '0.6.0',
 });
 
 const gatewayTool = (action: string) => async (input: Record<string, unknown> = {}) =>
   textResult(await callAgentApi(action, input));
 
 registerWorkflows(server);
+registerReports(server);
 
 function registerGatewayTool(
   name: string,

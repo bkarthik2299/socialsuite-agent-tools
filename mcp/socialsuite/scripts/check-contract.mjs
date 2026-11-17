@@ -6,16 +6,24 @@ import assert from 'node:assert/strict';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js';
 import { attachmentsSchema } from '../dist/attachments.js';
+import { reportDocumentSchema, reportDatasetSchema } from '../dist/reports.js';
 
 const app = process.argv[2];
 if (!app) throw new Error('Usage: npm run check:contract -- /absolute/path/to/social-suite');
 const shared = resolve(app, 'supabase/functions/_shared/agent_extensions.ts');
-const { superAiActions, analyticsActions, extensionWriteActions, workflowReadActions } = await import(pathToFileURL(shared).href);
+const { superAiActions, analyticsActions, reportActions, extensionWriteActions, workflowReadActions } = await import(pathToFileURL(shared).href);
 const transport = new StdioClientTransport({ command: process.execPath, args: ['dist/api-key-index.js'], env: { ...process.env, SOCIALSUITE_API_KEY: 'ss_read_contract_test' } });
 const client = new Client({ name: 'contract-check', version: '1.0.0' });
 try {
   await client.connect(transport);
   const { tools } = await client.listTools();
+  const reportsModel = await import(pathToFileURL(resolve(app, 'supabase/functions/_shared/diy-reports.ts')).href);
+  const reportsSkill = await readFile('../../skills/hermes/socialsuite/references/reports.md', 'utf8');
+  const draft = JSON.parse(reportsSkill.match(/```json\n([\s\S]*?)\n```/)[1]);
+  reportDocumentSchema.parse(draft.document);
+  draft.datasets.forEach(d => reportDatasetSchema.parse(d));
+  const resolved = reportsModel.present(draft.document, draft.datasets, [], null);
+  assert.equal(resolved.blocks.find(b => b.type === 'kpi').value, 15, 'Reports skill formula/value keys do not match the app');
   const { sources, connectableSources = sources } = await import(pathToFileURL(resolve(app, 'supabase/functions/_shared/analytics-model.ts')).href);
   for (const action of ['analytics_resources', 'analytics_map', 'analytics_connect_source']) {
     const schema = tools.find(t => t.name === `socialsuite_${action}`).inputSchema;
@@ -62,6 +70,7 @@ try {
   for (const [file, routes, excluded] of [
     ['super-ai', superAiActions, ['worker', 'stream']],
     ['analytics-api', analyticsActions, []],
+    ['reports-api', reportActions, ['public']],
   ]) {
     const source = await readFile(resolve(app, `supabase/functions/${file}/index.ts`), 'utf8');
     const actions = [...new Set([...source.matchAll(/body\.action === ["']([^"']+)["']/g)].map(m => m[1]))].filter(a => !excluded.includes(a)).sort();
@@ -73,5 +82,5 @@ try {
       assert.equal(extensionWriteActions.includes(action), !workflowReadActions.has(action), `${action}: write gate drift`);
     }
   }
-  console.log(`Contract verified: ${tools.length} MCP tools; all Super AI and Analytics actions match the app.`);
+  console.log(`Contract verified: ${tools.length} MCP tools; all Super AI, Analytics and Reports actions match the app.`);
 } finally { await client.close(); }

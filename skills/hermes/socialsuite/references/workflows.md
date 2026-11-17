@@ -231,6 +231,12 @@ Read `socialsuite_list_team` and identify the intended member using their email/
 
 Read [image-studio.md](image-studio.md) for generation, reference uploads, image edits, prompt tools, job polling, collections, favorites, and campaign draft placement.
 
+## DIY Reports
+
+Use the dedicated `socialsuite_reports_*` workflow and [reports.md](reports.md) for manual tables, connected metrics, formulas, key metrics and targets, charts, logos/colours and client-facing snapshots. Reports are scoped to an Analytics client, not directly to a project. Saving drafts and publishing are separate actions.
+
+The Calendar screen now includes task deadlines alongside campaign content, events and AI runs, with an item-type filter. To inspect those deadlines through MCP, read `socialsuite_list_tasks` and their `due_date`; `socialsuite_list_calendar_events` returns calendar events and does not turn task deadlines into duplicate events. Update the original task to change a deadline. Calendar tab/filter animation and Reports hover/layout controls are UI features, not additional mutation tools.
+
 ## Browser Navigation
 
 Use browser/UI navigation only for visual confirmation. For actual work, use MCP tools. MCP actions are more reliable than clicking through the UI.

@@ -1,8 +1,8 @@
 ---
 name: socialsuite
-description: Use SocialSuite MCP tools to manage workspace content, brand guides, Super AI chats and drafts, Analytics clients and reports, Image Studio, tasks, calendar, notes, and client reviews from Hermes or other MCP-compatible agents.
+description: Use SocialSuite MCP tools to manage workspace content, brand guides, Super AI chats and drafts, Analytics, DIY Reports with manual data and branding, Image Studio, tasks, calendar, notes, and client reviews from MCP-compatible agents.
 metadata:
-  version: "1.4.1"
+  version: "1.5.0"
   author: SocialSuite
   hermes:
     tags: [socialsuite, social-media, mcp, campaigns, brand-guides]
@@ -19,7 +19,7 @@ Call `socialsuite_whoami` before doing SocialSuite work. Confirm the active org,
 
 Tool names here are the MCP server names. Some harnesses add prefixes (for example Hermes registers `mcp_socialsuite_socialsuite_whoami`); use the discovered equivalent in your client.
 
-Connector 0.5.2 supports the existing workflows on Agent API 0.4.0 or a compatible newer backend. Card attribute edits require Agent API 0.5.1 capability `task-card-updates`; read [references/workflows.md](references/workflows.md#tasks-and-calendar) for assignment IDs, dates, clearing and project links. For organic social analytics, SE Ranking setup, and SEO quota reads, require the matching backend capabilities `analytics-social-organic`, `analytics-seranking`, and `analytics-seo-credits` from Agent API 0.5.0 or newer. Check capabilities for the feature you need (`super-ai`, `analytics`, `studio-model-selection`, `vault-v1-encryption`). Missing capabilities mean that feature needs a backend update; an exact version string mismatch alone is not a failure. Call `socialsuite_get_agent_catalog` to discover current model IDs and supported actions instead of guessing them. Attachments additionally require the app's attachment migration and updated Super AI function; the generic `super-ai` capability alone does not prove attachment support.
+Connector 0.6.0 adds DIY Reports on Agent API 0.6.0 with capability `diy-reports`; read [references/reports.md](references/reports.md) before constructing or editing reports. Existing workflows remain compatible with their previous backend requirements. Card attribute edits require `task-card-updates` from API 0.5.1; read [references/workflows.md](references/workflows.md#tasks-and-calendar) for assignment IDs, dates, clearing and project links. Organic social analytics, SE Ranking setup and SEO quota reads require `analytics-social-organic`, `analytics-seranking` and `analytics-seo-credits` from API 0.5.0. Missing capabilities mean that feature needs a backend update; an exact version mismatch alone is not a failure. Call `socialsuite_get_agent_catalog` for current model IDs/actions; prefer `superAiModels.choices` and its default for current chats. Attachments additionally require the app's attachment migration and updated Super AI function; `super-ai` alone does not prove attachment support.
 
 Use SocialSuite MCP tools directly. Do not try to click through the SocialSuite UI unless the user specifically asks for a visual check or browser-based verification.
 
@@ -30,6 +30,7 @@ Prefer workflow-specific tools over generic row tools:
 - Workspace overview: `socialsuite_workspace_overview`
 - Super AI (the current app chat workflow): read [references/super-ai.md](references/super-ai.md) for chats, credit quotes, generation, research, draft revisions, saving, undo and sharing.
 - Analytics: read [references/analytics.md](references/analytics.md) for client setup, organic social sources, SE Ranking connections/API credits, mapping and report interpretation.
+- DIY Reports: use `socialsuite_reports_*`; read [references/reports.md](references/reports.md) for connected metrics, manual values, formulas, KPI targets, charts, branding, revisions, copies and published snapshots.
 - Create/find project: `socialsuite_ensure_project`
 - Create/find folder: `socialsuite_ensure_folder`
 - Create/find campaign: `socialsuite_ensure_campaign`
