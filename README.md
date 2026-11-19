@@ -25,7 +25,7 @@ Create `mcp/socialsuite/.env` from `.env.example` and set:
 SOCIALSUITE_API_KEY=your_own_socialsuite_api_key
 ```
 
-Create a key in SocialSuite **My Account → Agent API Keys**, or the app's **Social Suite MCP** setup page. Read keys inspect data. Write actions also require workspace editor/admin access. For staging or self-hosting, use `SOCIALSUITE_AGENT_API_URL` for the backend and `SOCIALSUITE_APP_URL` for the browser origin of shared reports.
+Create a key in SocialSuite **My Account → Agent API Keys**, or the app's **Social Suite MCP** setup page. Read keys inspect data. Write actions also require workspace editor/admin access. For staging or self-hosting, use `SOCIALSUITE_AGENT_API_URL` for the backend. Set `SOCIALSUITE_APP_URL` to the matching browser origin to share reports on that instance.
 
 Never commit `.env`, passwords, API keys, service-role keys or generated session tokens. Each person uses their own key. Client-provided environment variables take precedence over `.env`.
 

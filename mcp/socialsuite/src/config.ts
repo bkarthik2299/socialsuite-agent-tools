@@ -13,6 +13,8 @@ const supabaseUrl = (optional('SOCIALSUITE_SUPABASE_URL') || DEFAULT_SUPABASE_UR
   /\/$/,
   '',
 );
+const defaultAgentApiUrl = `${DEFAULT_SUPABASE_URL}/functions/v1/agent-api`;
+const agentApiUrl = optional('SOCIALSUITE_AGENT_API_URL') || `${supabaseUrl}/functions/v1/agent-api`;
 
 export const config = {
   supabaseUrl,
@@ -22,7 +24,6 @@ export const config = {
   orgId: process.env.SOCIALSUITE_ORG_ID?.trim() || null,
   defaultLimit: Number(process.env.SOCIALSUITE_DEFAULT_LIMIT || 25),
   apiKey: optional('SOCIALSUITE_API_KEY'),
-  appUrl: optional('SOCIALSUITE_APP_URL') || 'https://www.socialsuite.app',
-  agentApiUrl:
-    optional('SOCIALSUITE_AGENT_API_URL') || `${supabaseUrl}/functions/v1/agent-api`,
+  appUrl: optional('SOCIALSUITE_APP_URL') || (agentApiUrl === defaultAgentApiUrl ? 'https://www.socialsuite.app' : ''),
+  agentApiUrl,
 };

@@ -72,8 +72,8 @@ export function registerReports(server: McpServer) {
     inputSchema: { ...shareInput, updatePreview: z.boolean().optional() },
     annotations: { readOnlyHint: false, destructiveHint: true, openWorldHint: true },
   }, async ({ reportId, updatePreview, acknowledgeMissing }) => {
-    const appUrl = new URL(config.appUrl);
-    if (!['http:', 'https:'].includes(appUrl.protocol) || appUrl.username || appUrl.password) {
+    const appUrl = URL.canParse(config.appUrl) ? new URL(config.appUrl) : null;
+    if (!appUrl || !['http:', 'https:'].includes(appUrl.protocol) || appUrl.username || appUrl.password) {
       throw new Error('Configure a valid SOCIALSUITE_APP_URL before sharing.');
     }
     const { share } = await callAgentApi<{ share?: { token: string; revoked: boolean } | null }>('reports_get', { reportId });

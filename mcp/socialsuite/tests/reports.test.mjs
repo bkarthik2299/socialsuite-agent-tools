@@ -131,6 +131,16 @@ test('MCP report construction, revision conflicts, branding and public preview l
       ['reports_duplicate', { reportId: example.reportId, clientId: example.clientId, period: { start: '2026-01-01', end: '2027-12-31' } }],
     ]) assert.equal((await client.callTool({ name: `socialsuite_${action}`, arguments: input })).isError, true);
     assert.equal(calls.length, prior, 'invalid report input must not reach the API');
+    const staging = new Client({ name: 'reports-staging-test', version: '1.0.0' });
+    try {
+      await staging.connect(new StdioClientTransport({ command: process.execPath, args: ['dist/api-key-index.js'], env: {
+        ...process.env, SOCIALSUITE_API_KEY: 'ss_write_reports_test', SOCIALSUITE_AGENT_API_URL: `http://127.0.0.1:${http.address().port}`, SOCIALSUITE_APP_URL: '',
+      } }));
+      const result = await staging.callTool({ name: 'socialsuite_reports_share', arguments: { reportId: example.reportId } });
+      assert.equal(result.isError, true);
+      assert.match(result.content[0].text, /SOCIALSUITE_APP_URL/);
+      assert.equal(calls.length, prior, 'a missing staging origin must not create a public preview');
+    } finally { await staging.close(); }
   } finally {
     await client.close();
     await new Promise(resolve => http.close(resolve));
