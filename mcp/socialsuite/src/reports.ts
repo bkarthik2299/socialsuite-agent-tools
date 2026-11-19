@@ -77,7 +77,7 @@ export function registerReports(server: McpServer) {
   tool('reports_duplicate', 'Copy a report structure to a new period/client with new report, dataset and block IDs. Business values and commentary are cleared. Another-client copies also clear connected mappings and the client logo. Remap from the destination catalog before sharing.', { ...report, ...client, period: reportPeriodSchema });
   const shareInput = { ...report, acknowledgeMissing: z.boolean().optional() };
   server.registerTool('socialsuite_reports_share', {
-    description: 'Create or copy an authorized report preview link that anyone can open without signing in. If a link already exists, return it as-is. Set updatePreview only when asked to display the latest saved report at that same link. Use Share → WhatsApp in the report editor to prepare the current shared snapshot as an image with the link. Review missing-data warnings before acknowledging them. Keep the URL private to intended recipients.',
+    description: 'Create or copy an authorized report preview link that anyone can open without signing in. If a link already exists, return it as-is. Set updatePreview only when asked to display the latest saved report at that same link. The report editor’s WhatsApp action opens the chat with the link and copies the preview image for pasting on desktop. Review missing-data warnings before acknowledging them. Keep the URL private to intended recipients.',
     inputSchema: { ...shareInput, updatePreview: z.boolean().optional() },
     annotations: { readOnlyHint: false, destructiveHint: true, openWorldHint: true },
   }, async ({ reportId, updatePreview, acknowledgeMissing }) => {

@@ -2,7 +2,7 @@
 name: socialsuite
 description: Use SocialSuite MCP tools to manage workspace content, brand guides, Super AI chats and drafts, Analytics, DIY Reports with manual data and branding, Image Studio, tasks, calendar, notes, and client reviews from MCP-compatible agents.
 metadata:
-  version: "1.6.4"
+  version: "1.6.5"
   author: SocialSuite
   hermes:
     tags: [socialsuite, social-media, mcp, campaigns, brand-guides]
