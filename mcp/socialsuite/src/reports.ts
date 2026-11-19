@@ -29,6 +29,11 @@ export const reportDatasetSchema = z.object({
   values: z.record(z.string().max(300), z.record(id, cell)), totals: z.boolean(),
   filter: z.string().max(200).optional(), sort: id.optional(),
   descending: z.boolean().optional(), hiddenKeys: z.array(z.string().max(300)).max(5000).optional(),
+  recordHeading: z.string().trim().max(100).optional(),
+  rowLabels: z.record(
+    z.string().max(300).regex(/^(?:total$|month:\d{4}-\d{2}$|campaign:.+)/),
+    z.string().trim().min(1).max(200),
+  ).refine(labels => Object.keys(labels).length <= 5000, 'Up to 5,000 row names are supported').optional(),
 });
 export const reportDocumentSchema = z.object({
   name: z.string().trim().min(1).max(160), description: text,

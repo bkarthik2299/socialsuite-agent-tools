@@ -6,7 +6,7 @@ The maintained MCP connector and portable Social Suite skill for Hermes and othe
 
 **Separate public repository:** https://github.com/bkarthik2299/socialsuite-agent-tools
 
-Connector **0.7.1** exposes **154 tools**, with portable skill **1.6.1**. It uses a SocialSuite Agent API key.
+Connector **0.7.2** exposes **154 tools**, with portable skill **1.6.2**. It uses a SocialSuite Agent API key.
 
 ## Install
 

@@ -30,6 +30,10 @@ Never join sources by account or campaign display name. Stable value keys includ
 
 `values[key]` maps column UUIDs to strings, finite numbers or null. Missing values are unavailable. Manual values for another date range must be retained: changing dates and coming back restores them. Filtering, sorting and hiding affect display, not totals. Table totals include all records in the period.
 
+Use `recordHeading` to label the first column. Rename custom records through `rows[].label`. For generated rows, edit `rowLabels` using `total`, `month:YYYY-MM`, or `campaign:MAPPING_UUID/CAMPAIGN_ID` as the key. The underlying cell keys stay unchanged. Use connector 0.7.2 or newer to edit these settings.
+
+Preserve text cell strings with the `socialsuite-rich-text:v1:` prefix unless the user asks to change their content. They carry the formatting and links produced by the report editor. Plain text remains a normal string.
+
 Stored formulas reference UUIDs in brackets, such as `[ADS_CONVERSIONS_COLUMN_UUID] + [MANUAL_LEADS_COLUMN_UUID]`. Supported operations are numbers, parentheses, `+ - * /`, and `SUM`, `COUNT`, `AVG` of a numeric column reference. UUIDs must match real columns in the same dataset. The UI accepts labels and converts them to IDs; MCP callers should send IDs. Cycles, missing/nonnumeric references, division by zero and incompatible currencies remain unavailable. Do not add GA4 key events to Ads conversions without establishing they are distinct leads. Label dummy/manual assumptions explicitly.
 
 Distinct users, rates and other nonadditive metrics require exact reporting-period totals instead of adding monthly values. Snapshot-only metrics require total grain. Line charts require a time dimension; donuts require additive nonnegative values. Campaign tables use stable campaign IDs from one supported ad account. Arbitrary provider dimensions or cross-account campaign joins are not supported.

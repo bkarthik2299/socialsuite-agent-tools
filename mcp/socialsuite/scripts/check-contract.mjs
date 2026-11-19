@@ -31,6 +31,14 @@ try {
   const parsedKpi = reportDocumentSchema.parse(directKpi);
   const directResult = reportsModel.present(parsedKpi, draft.datasets, [], null);
   assert.equal(directResult.blocks.find(b => b.type === 'kpi').value, 5, 'The connector must preserve direct KPI formulas');
+  const namedDataset = reportDatasetSchema.parse({
+    ...draft.datasets[0],
+    recordHeading: 'Period',
+    rowLabels: { total: 'Lead summary' },
+  });
+  const namedTable = reportsModel.present(draft.document, [namedDataset], [], null).blocks.find(b => b.type === 'table').table;
+  assert.equal(namedTable.recordHeading, 'Period');
+  assert.equal(namedTable.rows[0].label, 'Lead summary', 'The connector must preserve generated row names');
   const { sources, connectableSources = sources } = await import(pathToFileURL(resolve(app, 'supabase/functions/_shared/analytics-model.ts')).href);
   for (const action of ['analytics_resources', 'analytics_map', 'analytics_connect_source']) {
     const schema = tools.find(t => t.name === `socialsuite_${action}`).inputSchema;
