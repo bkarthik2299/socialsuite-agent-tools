@@ -91,8 +91,8 @@ Set `branding.accent` to the user's six-digit hex. The app applies it to heading
 
 `socialsuite_reports_duplicate` takes an existing `reportId`, destination `clientId` and new `period`. It preserves structure and formulas with fresh report/dataset/block IDs, clearing manual values, defaults and commentary. Another-client copies also clear connected mappings and client branding. Discover the destination catalog and remap before sharing. Keep each client's business numbers in their own report.
 
-Use **Report options → Download PDF** in the editor for a landscape report with charts, branding and page numbers. Wide tables continue in sections with the row labels and column headings repeated. The app also supports CSV per client-facing table and XLSX across client-facing tables.
+Use **Report options → Download PDF** in the editor for a landscape report with charts, branding and page numbers. Wide tables continue in groups with row labels and column headings repeated. The table title appears once. The app also supports CSV per client-facing table and XLSX across client-facing tables.
 
-Use **Share → WhatsApp** in the editor to prepare the current shared snapshot as an image and a short message with the sign-in-free link. On devices with file sharing, choose WhatsApp from the share sheet. Otherwise download the image, open WhatsApp with the prefilled message and attach it. Update the preview first when the link and image should reflect the latest edits.
+In **Share**, click the green **WhatsApp** button next to **Open preview**. On desktop it opens WhatsApp Web with the message and sign-in-free link filled in, and copies the PNG of the shared preview to paste into the chat. If clipboard access is unavailable, use the image download. On supported touch devices, choose WhatsApp in the share sheet to hand off the image and message together. Update the preview first when the link and image should reflect the latest edits.
 
 `reports_version` returns structured presentation data for generating a separate artifact. Downloading the app's PDF or image is an editor action. Permanent `socialsuite_reports_delete` requires confirmation at action time.
