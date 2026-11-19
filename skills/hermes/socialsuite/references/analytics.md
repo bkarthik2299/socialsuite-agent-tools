@@ -4,6 +4,14 @@ Use `socialsuite_analytics_bootstrap` to discover workspace clients, connections
 
 Read reports with `socialsuite_analytics_dashboard`, client ID, inclusive `start`/`end` dates in YYYY-MM-DD and optional `compare: true`. Reports may be queued or stale; inspect each report's readiness, errors, timezone, data-through date and warnings. Missing metrics are unavailable, not zero. The dashboard may enqueue missing reports, just as the app does, even for a read key. Avoid claiming live provider access or interpreting incomplete periods as final totals.
 
+## Analytics AI
+
+Use the dashboard for direct report reads. When the user asks for an Analytics AI analysis or a shareable answer, require `analytics-ai` in `socialsuite_whoami` and `configuration.analyticsAi` in `socialsuite_analytics_bootstrap`. A completed answer costs 0.5 Social Suite credits and requires a write key and authorization to spend.
+
+Call `socialsuite_analytics_ai_ask` with the scoped `clientId`, a new UUID `requestId`, an inclusive `period` ending on a completed UTC day, `messages` ending with a user question, and `authorizeCredits: true`. Use `section: "overview"` or an available source ID. `responseFormat: "message"` prepares text for sharing. Use the returned evidence and credit receipt to explain the result. Keep the request ID if completion is uncertain. The backend rejects duplicate IDs, and an automatic retry with a fresh ID could spend another 0.5 credits. Let the caller finish before starting another question. Configure the MCP host to allow at least 150 seconds for the tool if it uses a shorter default timeout.
+
+## Clients and sources
+
 For client setup:
 
 1. Create/update with `socialsuite_analytics_save_client`. On update, send the existing website/project/portal-client links unless changing them; omitted links are cleared by the app. Preferences use `socialsuite_analytics_client_preferences` for favorite/archive flags.
@@ -23,7 +31,7 @@ Reports include spend, clicks, impressions, CTR, CPC, CPM and campaign breakdown
 
 Preserve each report's currency code: no currency conversion or combined spend across different currencies. Do not sum Google and Meta conversions as deduplicated totals. Missing values are unavailable; ratios with zero denominators are unavailable. Inspect warnings, reporting timezones and attribution before comparing sources.
 
-Date ranges are inclusive, at most 366 days, and must omit the unfinished UTC day. Use explicit dates in the user's requested reporting context. Cached reports can remain after disconnect; disconnect stops SocialSuite sync but does not revoke the upstream Windsor/provider grant. Archive retains reports and stops synchronization. For provider access revocation, direct the user to Windsor/provider settings.
+Use inclusive completed UTC dates. Dashboard custom ranges allow up to 366 days. For **All time** use `start: "2000-01-01"` and the latest completed UTC day. Account retention limits coverage and All time has no previous-period comparison. Cached reports can remain after disconnect; disconnect stops SocialSuite sync but does not revoke the upstream Windsor/provider grant. Archive retains reports and stops synchronization. For provider access revocation, direct the user to Windsor/provider settings.
 
 ## Organic social analytics
 

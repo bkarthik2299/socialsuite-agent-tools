@@ -36,6 +36,13 @@ try {
   const credits = tools.find(t => t.name === 'socialsuite_analytics_seo_credits');
   assert.ok(credits, 'SE Ranking subscription credits need an MCP tool');
   assert.deepEqual([...credits.inputSchema.required].sort(), ['clientId', 'connectionId']);
+  const assistant = tools.find(t => t.name === 'socialsuite_analytics_ai_ask');
+  const deadlines = tools.find(t => t.name === 'socialsuite_list_task_deadlines');
+  assert.equal(assistant.annotations.readOnlyHint, false);
+  assert.ok(assistant.inputSchema.required.includes('authorizeCredits'));
+  assert.equal(deadlines.annotations.readOnlyHint, true);
+  assert.deepEqual([...deadlines.inputSchema.required].sort(), ['from', 'to']);
+  assert.equal(tools.find(t => t.name === 'socialsuite_reports_share').annotations.openWorldHint, true);
   const attachmentFile = resolve(app, 'supabase/functions/_shared/super_ai_attachments.ts');
   let attachmentValidator;
   try { await readFile(attachmentFile); attachmentValidator = await import(pathToFileURL(attachmentFile).href); }

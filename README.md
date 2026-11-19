@@ -6,7 +6,7 @@ The maintained MCP connector and portable Social Suite skill for Hermes and othe
 
 **Separate public repository:** https://github.com/bkarthik2299/socialsuite-agent-tools
 
-Connector **0.6.0** exposes **151 tools**, with portable skill **1.5.0**. It uses a SocialSuite Agent API key; no SocialSuite password or Supabase service key is needed.
+Connector **0.7.0** exposes **154 tools**, with portable skill **1.6.0**. It uses a SocialSuite Agent API key.
 
 ## Install
 
@@ -25,7 +25,7 @@ Create `mcp/socialsuite/.env` from `.env.example` and set:
 SOCIALSUITE_API_KEY=your_own_socialsuite_api_key
 ```
 
-Create a key in SocialSuite **My Account → Agent API Keys**, or the app's **Social Suite MCP** setup page. Read keys inspect data; write keys additionally require workspace editor/admin access. The production API URL is built in. Use `SOCIALSUITE_AGENT_API_URL` for staging/self-hosting.
+Create a key in SocialSuite **My Account → Agent API Keys**, or the app's **Social Suite MCP** setup page. Read keys inspect data. Write actions also require workspace editor/admin access. For staging or self-hosting, use `SOCIALSUITE_AGENT_API_URL` for the backend and `SOCIALSUITE_APP_URL` for the browser origin of shared reports.
 
 Never commit `.env`, passwords, API keys, service-role keys or generated session tokens. Each person uses their own key. Client-provided environment variables take precedence over `.env`.
 
@@ -59,17 +59,17 @@ Or ask your agent:
 
 > Use SocialSuite MCP. Identify my connected account and workspace, inspect key permission and backend capabilities, then discover the current model catalog. Do not change data or spend credits.
 
-`socialsuite_whoami` should report Agent API 0.6.0 for the full current feature set (older workflows support compatible earlier versions), with `super-ai`, `analytics`, `studio-model-selection` and `vault-v1-encryption`. For the new Analytics workflows, also check `analytics-social-organic`, `analytics-seranking` and `analytics-seo-credits`; `analytics` alone does not establish support. `socialsuite_get_agent_catalog` returns model IDs from the app's maintained catalogs. DIY Reports requires `diy-reports` and discovered `reportActions`. A missing capability means the backend needs updating; reinstalling the MCP alone cannot add backend features.
+Use the capabilities reported by `socialsuite_whoami` to check feature availability. Agent API 0.7.0 adds `analytics-ai` and `calendar-task-deadlines`. DIY Reports requires `diy-reports` and discovered `reportActions`. The catalog returns current model and workflow choices. Look up provider-specific requirements in the Analytics skill reference. The API key stays scoped to its workspace even if the user switches organizations in the browser.
 
 ## Feature coverage
 
 | Surface | Coverage |
 | --- | --- |
 | Super AI | Chats, project/brand context, history, prepared image/document attachments on quotes, credit estimates, paid generation, research, polling, drafts, manual/AI revisions, destinations, saving/undo, branching, sharing, pin/archive, cancel/delete, admin health |
-| Analytics | Clients, preferences, GA4/GSC/GBP/Google Ads/Meta Ads and eight organic social sources via Windsor; SE Ranking project/engine setup with the client's API key, SEO subscription API credits, reports, explicit dates, comparison, refresh and disconnect |
+| Analytics | Clients, preferences, GA4/GSC/GBP/Google Ads/Meta Ads and eight organic social sources via Windsor, SE Ranking setup and audit drilldowns, SEO API credits, date ranges including All time, and Analytics AI with evidence and a 0.5-credit completion receipt |
 | Image Studio | GPT Image 2 / 2.5 Flare / 2.5 Sunburst model selection, generation, editing, prompt tools, uploads, jobs, collections, favorites and campaign draft placement |
-| DIY Reports | Manual/connected tables, source/account metric discovery, calculations, KPI targets, charts, branding colours, project-logo selection and local logo upload, revision-safe saves, copies, frozen versions and explicit public sharing/revocation |
-| Workspace | Projects, folders, campaigns, content, calendar, tasks/stages/comments/references, notes, Feed Monitor, Client Portal reviews |
+| DIY Reports | Manual and connected tables, metric discovery, formulas, KPI targets, charts, branding, revision-safe saves, copies, and sign-in-free report previews with update and revoke controls |
+| Workspace | Projects, folders, campaigns, content, calendar events and task deadlines, tasks/stages/comments/references, notes, Feed Monitor, Client Portal reviews |
 | Brand | Website setup, brand guide assets, knowledge markdown, visual analysis and brand-aware image generation |
 | Account/team | Identity/profile, API keys, members/invitations, admin role changes/removal, micro-tool registry and credits |
 | Existing AI missions | Start/poll/commit/cancel, run history, custom agents and workflow order; retained for existing mission workflows |
@@ -78,6 +78,8 @@ Or ask your agent:
 Read the [skill](skills/hermes/socialsuite/SKILL.md) for feature workflows. Super AI, Analytics and Reports preserve app permissions and private data boundaries through the same authenticated backend functions. They are not exposed through generic table access. Super AI worker and streaming endpoints are not MCP tools; poll request/thread tools instead. UI-only features such as chart layout, metric selection, Google sign-in and marketing navigation do not need MCP mutation tools. Saving campaign drafts does not publish to social networks.
 
 ## Upgrade
+
+Release 0.7.0 adds `socialsuite_reports_share`, `socialsuite_analytics_ai_ask` and `socialsuite_list_task_deadlines`. An active report link can be copied again without changing the preview. Set `updatePreview: true` to share the latest saved version at the same URL. The last two tools require Agent API 0.7.0. Analytics AI also needs the enabled backend feature and authorization to spend credits.
 
 Release 0.6.0 adds 14 dedicated DIY Reports tools and the complete [Reports workflow reference](skills/hermes/socialsuite/references/reports.md). It requires Agent API 0.6.0 capability `diy-reports`, the Reports database migration and `reports-api` deployment. Reports delegate to the same user-authenticated app workflow, keep manual values and stable formula IDs, and reject stale revisions. Logo upload takes a normal local file; the user does not supply a URL. Public snapshots require explicit authorization. Read structured versions through MCP; CSV/XLSX/PDF downloads remain app exports.
 

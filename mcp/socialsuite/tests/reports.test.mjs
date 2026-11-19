@@ -17,11 +17,13 @@ test('the report construction skill example is a complete valid draft', () => {
   assert.equal(reportDocumentSchema.safeParse({ ...example.document, period: { start: '2026-11-30', end: '2026-11-01' } }).success, false);
 });
 
-test('MCP report construction, discovery, revision conflicts, branding upload and explicit publication', async () => {
+test('MCP report construction, revision conflicts, branding and public preview links', async () => {
   const calls = [];
   let saved;
   let revision = -1;
   let published = null;
+  let share = null;
+  let linkCount = 0;
   const http = createServer(async (req, res) => {
     const chunks = [];
     for await (const chunk of req) chunks.push(chunk);
@@ -38,10 +40,15 @@ test('MCP report construction, discovery, revision conflicts, branding upload an
       }
       saved = structuredClone(body.input); result = { revision: ++revision };
     } else if (body.action === 'reports_get') {
-      result = { report: { document: saved.document, revision }, datasets: saved.datasets };
+      result = { report: { document: saved.document, revision }, datasets: saved.datasets, share };
     } else if (body.action === 'reports_upload_logo') result = { url: 'https://assets.example.test/logo.png' };
     else if (body.action === 'reports_publish') {
-      published = structuredClone(saved); result = { token: 'fixture-report-token' };
+      published = structuredClone(saved);
+      if (!share || share.revoked) share = { token: `fixture-report-token-${++linkCount}`, revoked: false };
+      result = { token: share.token };
+    } else if (body.action === 'reports_revoke') {
+      share.revoked = true;
+      result = { ok: true };
     } else if (body.action === 'reports_version') result = { presentation: published.document };
     res.end(JSON.stringify({ result }));
   });
@@ -49,6 +56,7 @@ test('MCP report construction, discovery, revision conflicts, branding upload an
   const client = new Client({ name: 'reports-offline-test', version: '1.0.0' });
   const transport = new StdioClientTransport({ command: process.execPath, args: ['dist/api-key-index.js'], env: {
     ...process.env, SOCIALSUITE_API_KEY: 'ss_write_reports_test', SOCIALSUITE_AGENT_API_URL: `http://127.0.0.1:${http.address().port}`,
+    SOCIALSUITE_APP_URL: 'https://reports.example.test',
   } });
   const dir = await mkdtemp(join(tmpdir(), 'socialsuite-report-'));
   const invoke = async (action, input) => {
@@ -60,13 +68,14 @@ test('MCP report construction, discovery, revision conflicts, branding upload an
     await client.connect(transport);
     const { tools } = await client.listTools();
     const reads = ['list', 'get', 'data', 'catalog', 'defaults', 'branding_assets', 'version'];
-    const writes = ['save', 'refresh', 'duplicate', 'publish', 'revoke', 'delete', 'upload_logo'];
+    const writes = ['save', 'refresh', 'duplicate', 'share', 'publish', 'revoke', 'delete', 'upload_logo'];
     for (const [actions, readOnly] of [[reads, true], [writes, false]]) for (const suffix of actions) {
       const tool = tools.find(t => t.name === `socialsuite_reports_${suffix}`);
       assert.ok(tool, suffix);
       assert.equal(tool.annotations.readOnlyHint, readOnly);
     }
     assert.equal(tools.find(t => t.name === 'socialsuite_reports_publish').annotations.openWorldHint, true);
+    assert.equal(tools.find(t => t.name === 'socialsuite_reports_share').annotations.openWorldHint, true);
     assert.equal(tools.find(t => t.name === 'socialsuite_reports_delete').annotations.destructiveHint, true);
     assert.ok(!tools.some(t => t.name === 'socialsuite_reports_public'));
     await invoke('reports_save', example);
@@ -86,11 +95,17 @@ test('MCP report construction, discovery, revision conflicts, branding upload an
     const next = { ...example, revision: draft.report.revision, document: { ...draft.report.document, branding: { ...draft.report.document.branding, clientLogo: uploaded.url } }, datasets: draft.datasets };
     await invoke('reports_save', next);
     assert.deepEqual(saved.datasets[0].values, manual);
-    await invoke('reports_publish', { reportId: example.reportId, acknowledgeMissing: false });
+    const link = await invoke('reports_share', { reportId: example.reportId, acknowledgeMissing: false });
+    assert.deepEqual(link, { url: 'https://reports.example.test/shared-reports/fixture-report-token-1', status: 'created' });
     await invoke('reports_save', { ...next, revision: 1, document: { ...next.document, name: 'Changed draft' } });
     const version = await invoke('reports_version', { reportId: example.reportId, versionId: example.reportId });
     assert.equal(version.presentation.name, example.document.name);
     assert.equal(version.presentation.branding.clientLogo, uploaded.url);
+    assert.deepEqual(await invoke('reports_share', { reportId: example.reportId }), { url: link.url, status: 'existing' });
+    assert.equal(calls.at(-1).action, 'reports_get');
+    assert.equal(published.document.name, example.document.name);
+    assert.deepEqual(await invoke('reports_share', { reportId: example.reportId, updatePreview: true }), { url: link.url, status: 'updated' });
+    assert.equal(published.document.name, 'Changed draft');
     const cases = [
       ['reports_list', {}], ['reports_catalog', { clientId: example.clientId }],
       ['reports_defaults', { clientId: example.clientId }], ['reports_branding_assets', { clientId: example.clientId }],
@@ -102,6 +117,9 @@ test('MCP report construction, discovery, revision conflicts, branding upload an
       await invoke(action, input);
       assert.deepEqual(calls.at(-1), { action, input });
     }
+    const replacement = await invoke('reports_share', { reportId: example.reportId });
+    assert.equal(replacement.status, 'created');
+    assert.notEqual(replacement.url, link.url);
     const prior = calls.length;
     for (const [action, input] of [
       ['reports_save', { ...example, revision: 'latest' }],
