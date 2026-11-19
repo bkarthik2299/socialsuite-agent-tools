@@ -63,13 +63,13 @@ export function registerReports(server: McpServer) {
   const report = { reportId: id };
   const client = { clientId: id };
   tool('reports_list', 'List DIY Reports in the active workspace, including client IDs, document metadata, revisions and saved share versions.', {}, true);
-  tool('reports_get', 'Read the complete report, all datasets, current revision, versions and sharing state before editing. Preserve every dataset and manual value the user did not ask to change. Share tokens are private.', report, true);
+  tool('reports_get', 'Read the latest saved report, all datasets, current revision, versions and sharing state before editing. If a browser tab retained conflicting edits, the user can download them from Report options in that tab. Share tokens are private.', report, true);
   tool('reports_catalog', 'Discover actual available metrics grouped by connected data source and account for this Analytics client. Use returned mappingId, metric key, field, aggregation and currency; never guess metric IDs or treat unavailable values as zero.', client, true);
   tool('reports_defaults', 'Read agency/project branding defaults for a new DIY Report.', client, true);
   tool('reports_branding_assets', 'Read selectable logos from the client’s linked project Brand Guide. Otherwise use reports_upload_logo with a normal local image file.', client, true);
   tool('reports_data', 'Read connected metric cache, job status and warnings for the saved report. Missing cache can queue existing Analytics sync; poll with a delay until ready. Manual values stay in reports_get datasets.', report, true);
   tool('reports_version', 'Read one immutable shared report presentation, including its frozen branding, tables, KPI cards and charts.', { ...report, versionId: id }, true);
-  tool('reports_save', 'Create or atomically save a complete DIY Report. For a new report supply a new UUID reportId and revision -1. For edits first reports_get, preserve all datasets/values and use its exact revision. Re-read after a conflict. Retain stable IDs and use catalog metrics. Share separately when requested. Read the Reports skill reference for formulas, value keys and examples.', {
+  tool('reports_save', 'Create or atomically save a complete DIY Report. For a new report supply a new UUID reportId and revision -1. For edits, first call reports_get and use its exact revision. On a conflict, read the latest saved report and apply only the requested edits. Preserve other datasets, values and stable IDs. Use catalog metrics and share separately when requested. See the Reports skill reference for formulas, value keys and examples.', {
     ...report, ...client, revision: z.number().int().min(-1), document: reportDocumentSchema,
     datasets: z.array(reportDatasetSchema).max(50),
   }, false, true);
