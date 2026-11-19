@@ -141,6 +141,8 @@ Selecting a campaign fills its folder and project; selecting a folder fills its 
 
 Use `socialsuite_create_calendar_event` only when a campaign ID is known. Calendar event `type` should match the campaign type. Use `socialsuite_list_calendar_events` for date range views, and update/delete tools for changes.
 
+For task deadlines in Calendar, check `calendar-task-deadlines` and call `socialsuite_list_task_deadlines` with inclusive `from` and `to` dates. Use `nextOffset` to continue. Change a deadline by updating its original task's `dueDate`. For older compatible backends, read active tasks and filter by `due_date`. Deleted-task and stage recovery is an operator workflow in the app backend.
+
 ## Notes
 
 Use `socialsuite_create_note` for planning notes, research notes, or internal summaries. Link to `projectId` when the note belongs to a project. Use `socialsuite_list_notes`, `socialsuite_update_note`, and `socialsuite_delete_note` for note management.
@@ -233,9 +235,7 @@ Read [image-studio.md](image-studio.md) for generation, reference uploads, image
 
 ## DIY Reports
 
-Use the dedicated `socialsuite_reports_*` workflow and [reports.md](reports.md) for manual tables, connected metrics, formulas, key metrics and targets, charts, logos/colours and client-facing snapshots. Reports are scoped to an Analytics client, not directly to a project. Saving drafts and publishing are separate actions.
-
-The Calendar screen now includes task deadlines alongside campaign content, events and AI runs, with an item-type filter. To inspect those deadlines through MCP, read `socialsuite_list_tasks` and their `due_date`; `socialsuite_list_calendar_events` returns calendar events and does not turn task deadlines into duplicate events. Update the original task to change a deadline. Calendar tab/filter animation and Reports hover/layout controls are UI features, not additional mutation tools.
+Use the dedicated `socialsuite_reports_*` workflow and [reports.md](reports.md) for tables, connected metrics, formulas, KPI targets, charts, branding and client-facing previews. Reports belong to an Analytics client. Save edits and share a preview as separate actions.
 
 ## Browser Navigation
 

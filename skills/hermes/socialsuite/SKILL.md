@@ -2,7 +2,7 @@
 name: socialsuite
 description: Use SocialSuite MCP tools to manage workspace content, brand guides, Super AI chats and drafts, Analytics, DIY Reports with manual data and branding, Image Studio, tasks, calendar, notes, and client reviews from MCP-compatible agents.
 metadata:
-  version: "1.5.0"
+  version: "1.6.0"
   author: SocialSuite
   hermes:
     tags: [socialsuite, social-media, mcp, campaigns, brand-guides]
@@ -19,7 +19,7 @@ Call `socialsuite_whoami` before doing SocialSuite work. Confirm the active org,
 
 Tool names here are the MCP server names. Some harnesses add prefixes (for example Hermes registers `mcp_socialsuite_socialsuite_whoami`); use the discovered equivalent in your client.
 
-Connector 0.6.0 adds DIY Reports on Agent API 0.6.0 with capability `diy-reports`; read [references/reports.md](references/reports.md) before constructing or editing reports. Existing workflows remain compatible with their previous backend requirements. Card attribute edits require `task-card-updates` from API 0.5.1; read [references/workflows.md](references/workflows.md#tasks-and-calendar) for assignment IDs, dates, clearing and project links. Organic social analytics, SE Ranking setup and SEO quota reads require `analytics-social-organic`, `analytics-seranking` and `analytics-seo-credits` from API 0.5.0. Missing capabilities mean that feature needs a backend update; an exact version mismatch alone is not a failure. Call `socialsuite_get_agent_catalog` for current model IDs/actions; prefer `superAiModels.choices` and its default for current chats. Attachments additionally require the app's attachment migration and updated Super AI function; `super-ai` alone does not prove attachment support.
+Check the capability for the requested workflow. `diy-reports` covers report editing and preview links. `analytics-ai` and `calendar-task-deadlines` require Agent API 0.7.0. The references below list other requirements. Call `socialsuite_get_agent_catalog` for live model IDs and available actions. Use `superAiModels.choices` and its default for current chats. Verify the workspace and capabilities during setup without changing data or spending credits.
 
 Use SocialSuite MCP tools directly. Do not try to click through the SocialSuite UI unless the user specifically asks for a visual check or browser-based verification.
 
@@ -29,8 +29,8 @@ Prefer workflow-specific tools over generic row tools:
 
 - Workspace overview: `socialsuite_workspace_overview`
 - Super AI (the current app chat workflow): read [references/super-ai.md](references/super-ai.md) for chats, credit quotes, generation, research, draft revisions, saving, undo and sharing.
-- Analytics: read [references/analytics.md](references/analytics.md) for client setup, organic social sources, SE Ranking connections/API credits, mapping and report interpretation.
-- DIY Reports: use `socialsuite_reports_*`; read [references/reports.md](references/reports.md) for connected metrics, manual values, formulas, KPI targets, charts, branding, revisions, copies and published snapshots.
+- Analytics: read [references/analytics.md](references/analytics.md) for dashboards, paid Analytics AI answers, client/source setup, SEO credits and data interpretation.
+- DIY Reports: read [references/reports.md](references/reports.md) before building, editing or sharing. Use `socialsuite_reports_share` for the sign-in-free report preview.
 - Create/find project: `socialsuite_ensure_project`
 - Create/find folder: `socialsuite_ensure_folder`
 - Create/find campaign: `socialsuite_ensure_campaign`
@@ -44,7 +44,7 @@ Prefer workflow-specific tools over generic row tools:
 - Task references: `socialsuite_list_task_attachments`, `socialsuite_upload_task_attachment`, and `socialsuite_set_task_attachments`; read the attachment workflow before editing reference lists.
 - Team membership: `socialsuite_update_team_member_role` and `socialsuite_remove_team_member` use membership IDs from `socialsuite_list_team`.
 - Tasks: `socialsuite_list_tasks`, `socialsuite_update_task`, `socialsuite_move_task`, task comment tools, and task stage tools
-- Calendar: `socialsuite_list_calendar_events`, `socialsuite_update_calendar_event`, `socialsuite_delete_calendar_event`
+- Calendar: use `socialsuite_list_calendar_events` for events and `socialsuite_list_task_deadlines` for dated tasks. See [Tasks and Calendar](references/workflows.md#tasks-and-calendar).
 - Notes: `socialsuite_list_notes`, `socialsuite_update_note`, `socialsuite_delete_note`
 - Password Vault: `socialsuite_list_vault_credentials`, `socialsuite_create_vault_credential`, `socialsuite_update_vault_credential`, `socialsuite_delete_vault_credential`
 - Feed Monitor: `socialsuite_list_feed_monitor` and matching feed folder/post tools

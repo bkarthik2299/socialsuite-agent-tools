@@ -2,13 +2,14 @@ import { config } from './config.js';
 
 export type JsonObject = Record<string, unknown>;
 
-export async function callAgentApi<T = unknown>(action: string, input: JsonObject = {}): Promise<T> {
+export async function openAgentResponse(action: string, input: JsonObject, signal?: AbortSignal) {
   if (!config.apiKey) {
     throw new Error('SOCIALSUITE_API_KEY is required for API-key connector mode.');
   }
 
-  const response = await fetch(config.agentApiUrl, {
-    signal: AbortSignal.timeout(240_000),
+  const deadline = AbortSignal.timeout(240_000);
+  return fetch(config.agentApiUrl, {
+    signal: signal ? AbortSignal.any([signal, deadline]) : deadline,
     method: 'POST',
     headers: {
       Authorization: `Bearer ${config.apiKey}`,
@@ -16,7 +17,10 @@ export async function callAgentApi<T = unknown>(action: string, input: JsonObjec
     },
     body: JSON.stringify({ action, input }),
   });
+}
 
+export async function callAgentApi<T = unknown>(action: string, input: JsonObject = {}): Promise<T> {
+  const response = await openAgentResponse(action, input);
   const payload = await response.json().catch(() => { throw new Error(`SocialSuite Agent API ${action} returned a non-JSON response (${response.status}).`); }) as { result?: T; error?: string; message?: string };
   if (!response.ok || payload.error) {
     throw new Error(payload.error || payload.message || `SocialSuite Agent API ${action} failed.`);

@@ -2,6 +2,7 @@ import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod/v4';
 import { callAgentApi, textResult } from './gateway.js';
 import { attachmentsSchema } from './attachments.js';
+import { askAnalytics } from './analytics-ai.js';
 
 const id = z.string().uuid();
 const conversation = { conversationId: id };
@@ -22,7 +23,7 @@ export function registerWorkflows(server: McpServer) {
       return textResult(await callAgentApi(action, input));
     });
 
-  tool('get_agent_catalog', 'Discover current Super AI choices (including Auto), Studio models, Reports actions and other workflow actions. Use superAiModels.choices and its default for current chats; legacyMissionModels applies only to older campaign missions. Use returned IDs instead of guessing.', {}, true);
+  tool('get_agent_catalog', 'Discover current Super AI choices (including Auto), Studio models, Analytics AI and Reports actions. Use superAiModels.choices and its default for current chats. legacyMissionModels applies to older campaign missions.', {}, true);
   tool('super_ai_bootstrap', 'List accessible Super AI chats, projects, brands, credits and personal chat state.', {}, true);
   tool('super_ai_health', 'Admin only: check Super AI provider/model and recovery availability without generating content.', {}, true);
   tool('super_ai_create', 'Create a brand/project-aware Super AI chat. Does not generate content.', context);
@@ -58,6 +59,22 @@ export function registerWorkflows(server: McpServer) {
 
   tool('analytics_bootstrap', 'List workspace analytics clients, connections, active mappings, projects and portal clients.', {}, true);
   tool('analytics_dashboard', 'Read client reports for explicit inclusive YYYY-MM-DD dates, optionally compared with the previous period. Missing reports are queued by the app; inspect report readiness/errors before interpreting metrics.', period, true);
+  server.registerTool('socialsuite_analytics_ai_ask', {
+    description: 'Ask Analytics AI to analyze one client’s connected metrics or prepare a shareable answer. A completed response costs 0.5 credits. Require the analytics-ai capability, enabled Analytics AI for the workspace, a write key and authorization to spend. Submit a UUID requestId and retain it after interruption. The response includes evidence and the credit receipt.',
+    inputSchema: {
+      requestId: id, clientId: id,
+      period: z.object({ start: z.iso.date(), end: z.iso.date() }).refine(range => range.start <= range.end, 'Choose an inclusive date range in order.'),
+      section: z.union([z.literal('overview'), source]).optional(),
+      responseFormat: z.enum(['analysis', 'message']).optional(),
+      messages: z.array(z.discriminatedUnion('role', [
+        z.object({ role: z.literal('user'), content: z.string().trim().min(1).max(6000) }),
+        z.object({ role: z.literal('assistant'), content: z.string().trim().min(1).max(18000) }),
+      ])).min(1).max(20).refine(messages => messages.at(-1)?.role === 'user' && messages.reduce((total, message) => total + message.content.length, 0) <= 36000,
+        'Use a shorter conversation ending with a user question.'),
+      authorizeCredits: z.literal(true),
+    },
+    annotations: { readOnlyHint: false, destructiveHint: false, openWorldHint: true },
+  }, async (input, { signal }) => textResult(await askAnalytics(input, signal)));
   tool('analytics_save_client', 'Create or update an Analytics client. Updates replace name, website, project and portal-client links; preserve links the user did not ask to change.', { clientId: id.optional(), name: z.string().trim().min(1).max(120), website: z.string().optional(), projectId: id.nullable().optional(), portalClientId: id.nullable().optional() });
   tool('analytics_client_preferences', 'Set Analytics client favorite/archive flags.', { clientId: id, favorite: z.boolean().optional(), archived: z.boolean().optional() });
   tool('analytics_connect_source', 'Connect GA4, GSC, GBP, Google/Meta Ads or organic social sources through Windsor consent. For seo, supply the client\'s SE Ranking apiKey; no Windsor consent is used. Never echo or persist the key outside provider setup. Return Windsor authorization URLs privately and avoid restarting after an account was shared.', { clientId: id, source: connectableSource, apiKey: z.string().trim().min(1).max(4096).optional(), restart: z.boolean().optional() });

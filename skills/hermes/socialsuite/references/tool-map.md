@@ -12,7 +12,8 @@
 | Construct and edit DIY Reports | `socialsuite_reports_list`, `socialsuite_reports_get`, `socialsuite_reports_save`; see [reports.md](reports.md) |
 | Discover source/account metrics and refresh report data | `socialsuite_reports_catalog`, `socialsuite_reports_data`, `socialsuite_reports_refresh` |
 | Report logos and colour theme | `socialsuite_reports_defaults`, `socialsuite_reports_branding_assets`, `socialsuite_reports_upload_logo`, then `socialsuite_reports_save` |
-| Report copies, versions and explicit public sharing | `socialsuite_reports_duplicate`, `socialsuite_reports_version`, `socialsuite_reports_publish`, `socialsuite_reports_revoke` |
+| Report copies, versions and explicit public sharing | `socialsuite_reports_duplicate`, `socialsuite_reports_version`, `socialsuite_reports_share`, `socialsuite_reports_revoke` |
+| Analytics AI analysis or shareable answer | `socialsuite_analytics_ai_ask` |
 | Google Ads / Meta Ads performance | Analytics workflow with `source: "google_ads"` / `"meta_ads"`; reports do not modify live ads |
 | Organic social analytics | Existing Analytics workflow with exact platform source IDs; see [analytics.md](analytics.md) |
 | SE Ranking setup and reporting | `socialsuite_analytics_connect_source` with `source: "seo"` and private `apiKey`, then resources/map/dashboard |
@@ -31,6 +32,7 @@
 | Manage tasks | `socialsuite_list_tasks`, `socialsuite_create_task`, `socialsuite_update_task`, `socialsuite_move_task`, `socialsuite_delete_task` |
 | Manage task comments/stages | `socialsuite_add_task_comment`, `socialsuite_delete_task_comment`, `socialsuite_mark_task_comments_read`, `socialsuite_save_task_stages` |
 | Manage calendar | `socialsuite_list_calendar_events`, `socialsuite_create_calendar_event`, `socialsuite_update_calendar_event`, `socialsuite_delete_calendar_event` |
+| Calendar task deadlines | `socialsuite_list_task_deadlines`, `socialsuite_update_task` |
 | Manage notes | `socialsuite_list_notes`, `socialsuite_create_note`, `socialsuite_update_note`, `socialsuite_delete_note` |
 | Manage Password Vault | `socialsuite_list_vault_credentials`, `socialsuite_create_vault_credential`, `socialsuite_update_vault_credential`, `socialsuite_delete_vault_credential` |
 | Manage Feed Monitor | `socialsuite_list_feed_monitor`, feed folder/post create/update/delete tools |

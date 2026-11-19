@@ -68,7 +68,7 @@ const filterSchema = z.object({
 
 const server = new McpServer({
   name: 'socialsuite-api-key-mcp',
-  version: '0.6.0',
+  version: '0.7.0',
 });
 
 const gatewayTool = (action: string) => async (input: Record<string, unknown> = {}) =>
@@ -458,13 +458,22 @@ registerGatewayTool(
 registerGatewayTool(
   'socialsuite_list_calendar_events',
   'List SocialSuite calendar events',
-  'List calendar events, optionally constrained by date range.',
+  'List campaign calendar events, optionally constrained by date range. For task deadlines use list_task_deadlines.',
   {
     from: z.string().optional(),
     to: z.string().optional(),
     limit: z.number().int().positive().max(250).default(100),
   },
   'list_calendar_events',
+  true,
+);
+
+registerGatewayTool(
+  'socialsuite_list_task_deadlines',
+  'List SocialSuite task deadlines',
+  'List active workspace tasks with due dates in an inclusive YYYY-MM-DD range, ordered by date and task ID. Paginate with nextOffset. Change dates on the original task with update_task.',
+  { from: z.iso.date(), to: z.iso.date(), offset: z.number().int().nonnegative().optional(), limit: z.number().int().positive().max(250).optional() },
+  'list_task_deadlines',
   true,
 );
 
