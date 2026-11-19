@@ -63,7 +63,7 @@ export function registerReports(server: McpServer) {
   const report = { reportId: id };
   const client = { clientId: id };
   tool('reports_list', 'List DIY Reports in the active workspace, including client IDs, document metadata, revisions and saved share versions.', {}, true);
-  tool('reports_get', 'Read the latest saved report, all datasets, current revision, versions and sharing state before editing. If a browser tab retained conflicting edits, the user can download them from Report options in that tab. Share tokens are private.', report, true);
+  tool('reports_get', 'Read the latest saved report, all datasets, current revision, versions and sharing state before editing. Use the saved revision as the base for edits. Share tokens are private.', report, true);
   tool('reports_catalog', 'Discover actual available metrics grouped by connected data source and account for this Analytics client. Use returned mappingId, metric key, field, aggregation and currency; never guess metric IDs or treat unavailable values as zero.', client, true);
   tool('reports_defaults', 'Read agency/project branding defaults for a new DIY Report.', client, true);
   tool('reports_branding_assets', 'Read selectable logos from the client’s linked project Brand Guide. Otherwise use reports_upload_logo with a normal local image file.', client, true);
@@ -77,7 +77,7 @@ export function registerReports(server: McpServer) {
   tool('reports_duplicate', 'Copy a report structure to a new period/client with new report, dataset and block IDs. Business values and commentary are cleared. Another-client copies also clear connected mappings and the client logo. Remap from the destination catalog before sharing.', { ...report, ...client, period: reportPeriodSchema });
   const shareInput = { ...report, acknowledgeMissing: z.boolean().optional() };
   server.registerTool('socialsuite_reports_share', {
-    description: 'Create or copy an authorized report preview link that anyone can open without signing in. If a link already exists, return it as-is. Set updatePreview only when asked to display the latest saved report at that same link. Review missing-data warnings before acknowledging them. Keep the URL private to intended recipients.',
+    description: 'Create or copy an authorized report preview link that anyone can open without signing in. If a link already exists, return it as-is. Set updatePreview only when asked to display the latest saved report at that same link. Use Share → WhatsApp in the report editor to prepare the current shared snapshot as an image with the link. Review missing-data warnings before acknowledging them. Keep the URL private to intended recipients.',
     inputSchema: { ...shareInput, updatePreview: z.boolean().optional() },
     annotations: { readOnlyHint: false, destructiveHint: true, openWorldHint: true },
   }, async ({ reportId, updatePreview, acknowledgeMissing }) => {
