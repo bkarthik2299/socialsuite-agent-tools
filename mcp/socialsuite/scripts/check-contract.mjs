@@ -24,6 +24,13 @@ try {
   draft.datasets.forEach(d => reportDatasetSchema.parse(d));
   const resolved = reportsModel.present(draft.document, draft.datasets, [], null);
   assert.equal(resolved.blocks.find(b => b.type === 'kpi').value, 15, 'Reports skill formula/value keys do not match the app');
+  const directKpi = structuredClone(draft.document);
+  const kpi = directKpi.blocks.find(b => b.type === 'kpi');
+  kpi.calculation = { expression: `[${kpi.columnId}] / 3`, format: 'number' };
+  delete kpi.columnId;
+  const parsedKpi = reportDocumentSchema.parse(directKpi);
+  const directResult = reportsModel.present(parsedKpi, draft.datasets, [], null);
+  assert.equal(directResult.blocks.find(b => b.type === 'kpi').value, 5, 'The connector must preserve direct KPI formulas');
   const { sources, connectableSources = sources } = await import(pathToFileURL(resolve(app, 'supabase/functions/_shared/analytics-model.ts')).href);
   for (const action of ['analytics_resources', 'analytics_map', 'analytics_connect_source']) {
     const schema = tools.find(t => t.name === `socialsuite_${action}`).inputSchema;

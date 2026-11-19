@@ -6,7 +6,7 @@ The maintained MCP connector and portable Social Suite skill for Hermes and othe
 
 **Separate public repository:** https://github.com/bkarthik2299/socialsuite-agent-tools
 
-Connector **0.7.0** exposes **154 tools**, with portable skill **1.6.0**. It uses a SocialSuite Agent API key.
+Connector **0.7.1** exposes **154 tools**, with portable skill **1.6.1**. It uses a SocialSuite Agent API key.
 
 ## Install
 
@@ -68,7 +68,7 @@ Use the capabilities reported by `socialsuite_whoami` to check feature availabil
 | Super AI | Chats, project/brand context, history, prepared image/document attachments on quotes, credit estimates, paid generation, research, polling, drafts, manual/AI revisions, destinations, saving/undo, branching, sharing, pin/archive, cancel/delete, admin health |
 | Analytics | Clients, preferences, GA4/GSC/GBP/Google Ads/Meta Ads and eight organic social sources via Windsor, SE Ranking setup and audit drilldowns, SEO API credits, date ranges including All time, and Analytics AI with evidence and a 0.5-credit completion receipt |
 | Image Studio | GPT Image 2 / 2.5 Flare / 2.5 Sunburst model selection, generation, editing, prompt tools, uploads, jobs, collections, favorites and campaign draft placement |
-| DIY Reports | Manual and connected tables, metric discovery, formulas, KPI targets, charts, branding, revision-safe saves, copies, and sign-in-free report previews with update and revoke controls |
+| DIY Reports | Manual and connected tables, metric discovery, table and KPI formulas, KPI targets, charts, branding, revision-safe saves, copies, and sign-in-free report previews with update and revoke controls |
 | Workspace | Projects, folders, campaigns, content, calendar events and task deadlines, tasks/stages/comments/references, notes, Feed Monitor, Client Portal reviews |
 | Brand | Website setup, brand guide assets, knowledge markdown, visual analysis and brand-aware image generation |
 | Account/team | Identity/profile, API keys, members/invitations, admin role changes/removal, micro-tool registry and credits |

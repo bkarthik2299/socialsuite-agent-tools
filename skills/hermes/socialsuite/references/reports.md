@@ -69,6 +69,12 @@ The following is a complete new draft payload with two manual lead sources and a
 
 The KPI should resolve to 15 and 75% of target. To mix in connected metrics, add columns using catalog IDs and reference those column UUIDs in the total. Read fresh cache and warnings before interpreting the result.
 
+## Direct KPI formulas
+
+For a KPI that calculates its own value, set `type: "kpi"`, keep the source `tableId`, and give it a `calculation` object with `expression` and `format` (`number`, `currency`, or `percentage`). Omit `columnId` for this mode. Use stable column IDs from the selected table, for example `[spend-column-id] / [total-leads-column-id]`. A plain column reference uses the period total. For currency, use the source currency or set a three-letter fallback code in `calculation.currency`.
+
+Use connector 0.7.1 or newer to edit reports containing direct KPI formulas. Preserve the `calculation` object when editing other parts of the report.
+
 ## Branding, sharing and copies
 
 `socialsuite_reports_branding_assets` returns selectable logos from the linked project's Brand Guide. For a manual file use `socialsuite_reports_upload_logo` with `reportId` and an absolute `filePath` on the MCP server machine (PNG/JPG/WebP, up to 2 MB). Upload only a file the user authorized. It returns a stored asset URL; assign it to `clientLogo` or `agencyLogo` in the next complete `reports_save`. Do not ask the user to provide a logo URL. Removing a logo clears the field, retaining old assets for snapshots.
