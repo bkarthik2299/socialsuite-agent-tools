@@ -42,6 +42,10 @@ export const reportDocumentSchema = z.object({
     title: z.string().max(200), description: text, internal: z.boolean(),
     tableId: id.optional(), columnId: id.optional(), chart: z.enum(['line', 'bar', 'donut']).optional(),
     text: text.optional(), target: z.number().finite().optional(),
+    calculation: z.object({
+      expression: z.string().min(1).max(1000), format: z.enum(['number', 'currency', 'percentage']),
+      currency: z.string().regex(/^[A-Z]{3}$/).optional(),
+    }).optional(),
   })).max(100),
 });
 
