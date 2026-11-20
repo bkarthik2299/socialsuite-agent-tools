@@ -10,9 +10,10 @@
 | Super AI image/document context | Prepared `attachments` on `socialsuite_super_ai_quote`; see [super-ai.md](super-ai.md) |
 | Analytics clients, sources and reports | `socialsuite_analytics_*`; see [analytics.md](analytics.md) |
 | Construct and edit DIY Reports | `socialsuite_reports_list`, `socialsuite_reports_get`, `socialsuite_reports_save`; see [reports.md](reports.md) |
+| Report table orientation | `socialsuite_reports_save` with dataset `layout` set to `horizontal` or `transposed` (Vertical); image snapshots always stay vertical |
 | Discover source/account metrics and refresh report data | `socialsuite_reports_catalog`, `socialsuite_reports_data`, `socialsuite_reports_refresh` |
 | Report logos and colour theme | `socialsuite_reports_defaults`, `socialsuite_reports_branding_assets`, `socialsuite_reports_upload_logo`, then `socialsuite_reports_save` |
-| Report copies, versions and explicit public sharing | `socialsuite_reports_duplicate`, `socialsuite_reports_version`, `socialsuite_reports_share`, `socialsuite_reports_revoke` |
+| Report copies, versions and explicit public sharing | `socialsuite_reports_duplicate`, `socialsuite_reports_version`, `socialsuite_reports_share` (report URL, vertical image URL and message), `socialsuite_reports_revoke` |
 | Analytics AI analysis or shareable answer | `socialsuite_analytics_ai_ask` |
 | Google Ads / Meta Ads performance | Analytics workflow with `source: "google_ads"` / `"meta_ads"`; reports do not modify live ads |
 | Organic social analytics | Existing Analytics workflow with exact platform source IDs; see [analytics.md](analytics.md) |

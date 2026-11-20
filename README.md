@@ -6,7 +6,7 @@ The maintained MCP connector and portable Social Suite skill for Hermes and othe
 
 **Separate public repository:** https://github.com/bkarthik2299/socialsuite-agent-tools
 
-Connector **0.7.5** exposes **154 tools**, with portable skill **1.6.5**. It uses a SocialSuite Agent API key.
+Connector **0.7.6** exposes **154 tools**, with portable skill **1.6.6**. It uses a SocialSuite Agent API key.
 
 ## Install
 
@@ -68,7 +68,7 @@ Use the capabilities reported by `socialsuite_whoami` to check feature availabil
 | Super AI | Chats, project/brand context, history, prepared image/document attachments on quotes, credit estimates, paid generation, research, polling, drafts, manual/AI revisions, destinations, saving/undo, branching, sharing, pin/archive, cancel/delete, admin health |
 | Analytics | Clients, preferences, GA4/GSC/GBP/Google Ads/Meta Ads and eight organic social sources via Windsor, SE Ranking setup and audit drilldowns, SEO API credits, date ranges including All time, and Analytics AI with evidence and a 0.5-credit completion receipt |
 | Image Studio | GPT Image 2 / 2.5 Flare / 2.5 Sunburst model selection, generation, editing, prompt tools, uploads, jobs, collections, favorites and campaign draft placement |
-| DIY Reports | Manual and connected tables, metric discovery, table and KPI formulas, KPI targets, charts, branding, revision-safe saves, copies, and sign-in-free report previews with update and revoke controls |
+| DIY Reports | Manual and connected tables, horizontal/vertical layouts, metric discovery, table and KPI formulas, KPI targets, charts, report-only branding, revision-safe saves, copies, and sign-in-free report/image links with update and revoke actions |
 | Workspace | Projects, folders, campaigns, content, calendar events and task deadlines, tasks/stages/comments/references, notes, Feed Monitor, Client Portal reviews |
 | Brand | Website setup, brand guide assets, knowledge markdown, visual analysis and brand-aware image generation |
 | Account/team | Identity/profile, API keys, members/invitations, admin role changes/removal, micro-tool registry and credits |
@@ -78,6 +78,8 @@ Use the capabilities reported by `socialsuite_whoami` to check feature availabil
 Read the [skill](skills/hermes/socialsuite/SKILL.md) for feature workflows. Super AI, Analytics and Reports preserve app permissions and private data boundaries through the same authenticated backend functions. They are not exposed through generic table access. Super AI worker and streaming endpoints are not MCP tools; poll request/thread tools instead. UI-only features such as chart layout, metric selection, Google sign-in and marketing navigation do not need MCP mutation tools. Saving campaign drafts does not publish to social networks.
 
 ## Upgrade
+
+Release 0.7.6 preserves the per-table `layout` field (`horizontal` or `transposed`, labelled Vertical in the app) during MCP saves. `socialsuite_reports_share` now also returns `snapshotUrl` for the vertical JPEG and a ready-to-use `message` with the report link. Existing `url`/`status` and explicit `updatePreview` behavior are retained. Skill 1.6.6 covers the icon-only layout controls, compact vertical snapshots independent of the saved table orientation, aligned values, report-only branding, automatic browser Share preparation, clickable image preview and **Copy image & text** / WhatsApp actions. Layout support requires the Reports backend from app PR #147 or later; the server image route requires the frontend/server deployment from PR #144 or later. This release needs no new API action or database migration.
 
 Release 0.7.0 adds `socialsuite_reports_share`, `socialsuite_analytics_ai_ask` and `socialsuite_list_task_deadlines`. An active report link can be copied again without changing the preview. Set `updatePreview: true` to share the latest saved version at the same URL. The last two tools require Agent API 0.7.0. Analytics AI also needs the enabled backend feature and authorization to spend credits.
 
