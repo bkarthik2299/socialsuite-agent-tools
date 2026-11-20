@@ -9,10 +9,14 @@ import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js'
 import { reportDocumentSchema, reportDatasetSchema } from '../dist/reports.js';
 
 const reference = await readFile('../../skills/hermes/socialsuite/references/reports.md', 'utf8');
-const example = JSON.parse(reference.match(/```json\n([\s\S]*?)\n```/)[1]);
+const example = JSON.parse(reference.match(/```json\r?\n([\s\S]*?)\r?\n```/)[1]);
 test('the report construction skill example is a complete valid draft', () => {
   assert.deepEqual(reportDocumentSchema.parse(example.document), example.document);
   assert.deepEqual(example.datasets.map(d => reportDatasetSchema.parse(d)), example.datasets);
+  const { layout, ...legacyDataset } = example.datasets[0];
+  assert.equal(layout, 'transposed');
+  assert.deepEqual(reportDatasetSchema.parse(legacyDataset), legacyDataset, 'legacy tables do not acquire a layout');
+  assert.equal(reportDatasetSchema.safeParse({ ...legacyDataset, layout: 'vertical' }).success, false, 'Vertical is a UI label, not an API enum value');
   for (const date of ['2026-02-30', 'today']) assert.equal(reportDocumentSchema.safeParse({ ...example.document, period: { start: date, end: '2026-11-30' } }).success, false);
   assert.equal(reportDocumentSchema.safeParse({ ...example.document, period: { start: '2026-11-30', end: '2026-11-01' } }).success, false);
 });
@@ -78,7 +82,9 @@ test('MCP report construction, revision conflicts, branding and public preview l
     assert.equal(tools.find(t => t.name === 'socialsuite_reports_share').annotations.openWorldHint, true);
     assert.equal(tools.find(t => t.name === 'socialsuite_reports_delete').annotations.destructiveHint, true);
     assert.ok(!tools.some(t => t.name === 'socialsuite_reports_public'));
+    assert.deepEqual(tools.find(t => t.name === 'socialsuite_reports_save').inputSchema.properties.datasets.items.properties.layout.enum, ['horizontal', 'transposed']);
     await invoke('reports_save', example);
+    assert.equal(calls.at(-1).input.datasets[0].layout, 'transposed', 'vertical layout must reach the Reports API');
     assert.equal(published, null, 'saving a draft must never publish');
     const draft = await invoke('reports_get', { reportId: example.reportId });
     assert.deepEqual(draft.datasets, example.datasets);
@@ -92,19 +98,27 @@ test('MCP report construction, revision conflicts, branding and public preview l
     const uploaded = await invoke('reports_upload_logo', { reportId: example.reportId, filePath });
     assert.deepEqual(calls.at(-1), { action: 'reports_upload_logo', input: { reportId: example.reportId, mime: 'image/png', data: png.toString('base64') } });
     assert.equal(published, null, 'logo upload must never publish');
-    const next = { ...example, revision: draft.report.revision, document: { ...draft.report.document, branding: { ...draft.report.document.branding, clientLogo: uploaded.url } }, datasets: draft.datasets };
+    const next = { ...example, revision: draft.report.revision, document: { ...draft.report.document, branding: { ...draft.report.document.branding, clientLogo: uploaded.url } }, datasets: draft.datasets.map(d => ({ ...d, layout: 'horizontal' })) };
     await invoke('reports_save', next);
     assert.deepEqual(saved.datasets[0].values, manual);
+    assert.equal(saved.datasets[0].layout, 'horizontal', 'switching orientation must preserve data and reach the API');
     const link = await invoke('reports_share', { reportId: example.reportId, acknowledgeMissing: false });
-    assert.deepEqual(link, { url: 'https://reports.example.test/shared-reports/fixture-report-token-1', status: 'created' });
+    assert.deepEqual(link, {
+      url: 'https://reports.example.test/shared-reports/fixture-report-token-1',
+      snapshotUrl: 'https://reports.example.test/shared-report-preview/fixture-report-token-1',
+      message: 'Here’s the report.\nhttps://reports.example.test/shared-reports/fixture-report-token-1',
+      status: 'created',
+    });
     await invoke('reports_save', { ...next, revision: 1, document: { ...next.document, name: 'Changed draft' } });
     const version = await invoke('reports_version', { reportId: example.reportId, versionId: example.reportId });
     assert.equal(version.presentation.name, example.document.name);
     assert.equal(version.presentation.branding.clientLogo, uploaded.url);
-    assert.deepEqual(await invoke('reports_share', { reportId: example.reportId }), { url: link.url, status: 'existing' });
+    assert.deepEqual(await invoke('reports_share', { reportId: example.reportId }), { ...link, status: 'existing' });
     assert.equal(calls.at(-1).action, 'reports_get');
     assert.equal(published.document.name, example.document.name);
-    assert.deepEqual(await invoke('reports_share', { reportId: example.reportId, updatePreview: true }), { url: link.url, status: 'updated' });
+    assert.deepEqual(await invoke('reports_share', { reportId: example.reportId, updatePreview: false }), { ...link, status: 'existing' });
+    assert.equal(calls.at(-1).action, 'reports_get', 'explicitly copying an existing preview must not republish');
+    assert.deepEqual(await invoke('reports_share', { reportId: example.reportId, updatePreview: true }), { ...link, status: 'updated' });
     assert.equal(published.document.name, 'Changed draft');
     const cases = [
       ['reports_list', {}], ['reports_catalog', { clientId: example.clientId }],
@@ -120,11 +134,14 @@ test('MCP report construction, revision conflicts, branding and public preview l
     const replacement = await invoke('reports_share', { reportId: example.reportId });
     assert.equal(replacement.status, 'created');
     assert.notEqual(replacement.url, link.url);
+    assert.notEqual(replacement.snapshotUrl, link.snapshotUrl);
+    assert.equal(replacement.message, `Here’s the report.\n${replacement.url}`);
     const prior = calls.length;
     for (const [action, input] of [
       ['reports_save', { ...example, revision: 'latest' }],
       ['reports_save', { ...example, document: { ...example.document, branding: { ...example.document.branding, accent: 'olive' } } }],
       ['reports_save', { ...example, datasets: [{ ...example.datasets[0], columns: [{ ...example.datasets[0].columns[0], field: 'script' }] }] }],
+      ['reports_save', { ...example, datasets: [{ ...example.datasets[0], layout: 'vertical' }] }],
       ['reports_get', { reportId: 'wrong' }], ['reports_publish', {}],
       ['reports_upload_logo', { reportId: example.reportId, filePath: 'relative.png' }],
       ['reports_upload_logo', { reportId: example.reportId, filePath: join(dir, 'logo.svg') }],

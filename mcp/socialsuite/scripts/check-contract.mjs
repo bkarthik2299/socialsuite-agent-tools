@@ -19,7 +19,7 @@ try {
   const { tools } = await client.listTools();
   const reportsModel = await import(pathToFileURL(resolve(app, 'supabase/functions/_shared/diy-reports.ts')).href);
   const reportsSkill = await readFile('../../skills/hermes/socialsuite/references/reports.md', 'utf8');
-  const draft = JSON.parse(reportsSkill.match(/```json\n([\s\S]*?)\n```/)[1]);
+  const draft = JSON.parse(reportsSkill.match(/```json\r?\n([\s\S]*?)\r?\n```/)[1]);
   reportDocumentSchema.parse(draft.document);
   draft.datasets.forEach(d => reportDatasetSchema.parse(d));
   const resolved = reportsModel.present(draft.document, draft.datasets, [], null);
@@ -39,6 +39,15 @@ try {
   const namedTable = reportsModel.present(draft.document, [namedDataset], [], null).blocks.find(b => b.type === 'table').table;
   assert.equal(namedTable.recordHeading, 'Period');
   assert.equal(namedTable.rows[0].label, 'Lead summary', 'The connector must preserve generated row names');
+  for (const layout of ['horizontal', 'transposed']) {
+    const dataset = reportDatasetSchema.parse({ ...namedDataset, layout });
+    assert.equal(dataset.layout, layout, 'The connector must retain the saved table layout');
+    const table = reportsModel.present(draft.document, [dataset], [], null).blocks.find(b => b.type === 'table').table;
+    assert.equal(table.layout, layout, 'The app presentation must retain the MCP table layout');
+    assert.equal(table.recordHeading, 'Period');
+    assert.deepEqual(table.rows, namedTable.rows, 'Orientation changes must retain record labels and data');
+    assert.deepEqual(table.columns, namedTable.columns, 'Orientation changes must retain metric IDs and formats');
+  }
   const { sources, connectableSources = sources } = await import(pathToFileURL(resolve(app, 'supabase/functions/_shared/analytics-model.ts')).href);
   for (const action of ['analytics_resources', 'analytics_map', 'analytics_connect_source']) {
     const schema = tools.find(t => t.name === `socialsuite_${action}`).inputSchema;

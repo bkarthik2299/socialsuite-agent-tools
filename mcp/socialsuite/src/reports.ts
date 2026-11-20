@@ -29,6 +29,7 @@ export const reportDatasetSchema = z.object({
   values: z.record(z.string().max(300), z.record(id, cell)), totals: z.boolean(),
   filter: z.string().max(200).optional(), sort: id.optional(),
   descending: z.boolean().optional(), hiddenKeys: z.array(z.string().max(300)).max(5000).optional(),
+  layout: z.enum(['horizontal', 'transposed']).describe('Saved table orientation: horizontal or Vertical (stored as transposed). Preserve on edits. Image snapshots always use the vertical layout independently.').optional(),
   recordHeading: z.string().trim().max(100).optional(),
   rowLabels: z.record(
     z.string().max(300).regex(/^(?:total$|month:\d{4}-\d{2}$|campaign:.+)/),
@@ -69,7 +70,7 @@ export function registerReports(server: McpServer) {
   tool('reports_branding_assets', 'Read selectable logos from the client’s linked project Brand Guide. Otherwise use reports_upload_logo with a normal local image file.', client, true);
   tool('reports_data', 'Read connected metric cache, job status and warnings for the saved report. Missing cache can queue existing Analytics sync; poll with a delay until ready. Manual values stay in reports_get datasets.', report, true);
   tool('reports_version', 'Read one immutable shared report presentation, including its frozen branding, tables, KPI cards and charts.', { ...report, versionId: id }, true);
-  tool('reports_save', 'Create or atomically save a complete DIY Report. For a new report supply a new UUID reportId and revision -1. For edits, first call reports_get and use its exact revision. On a conflict, read the latest saved report and apply only the requested edits. Preserve other datasets, values and stable IDs. Use catalog metrics and share separately when requested. See the Reports skill reference for formulas, value keys and examples.', {
+  tool('reports_save', 'Create or atomically save a complete DIY Report. For a new report supply a new UUID reportId and revision -1. For edits, first call reports_get and use its exact revision. On a conflict, read the latest saved report and apply only the requested edits. Preserve other datasets, values, stable IDs and layout. Table layout is horizontal or transposed (Vertical in the UI); image snapshots always remain vertical. Use catalog metrics and share separately when requested. See the Reports skill reference for formulas, value keys and examples.', {
     ...report, ...client, revision: z.number().int().min(-1), document: reportDocumentSchema,
     datasets: z.array(reportDatasetSchema).max(50),
   }, false, true);
@@ -77,7 +78,7 @@ export function registerReports(server: McpServer) {
   tool('reports_duplicate', 'Copy a report structure to a new period/client with new report, dataset and block IDs. Business values and commentary are cleared. Another-client copies also clear connected mappings and the client logo. Remap from the destination catalog before sharing.', { ...report, ...client, period: reportPeriodSchema });
   const shareInput = { ...report, acknowledgeMissing: z.boolean().optional() };
   server.registerTool('socialsuite_reports_share', {
-    description: 'Create or copy an authorized report preview link that anyone can open without signing in. If a link already exists, return it as-is. Set updatePreview only when asked to display the latest saved report at that same link. The report editor’s WhatsApp action opens the chat with the link and copies the preview image for pasting on desktop. Review missing-data warnings before acknowledging them. Keep the URL private to intended recipients.',
+    description: 'Create or copy an authorized report preview link that anyone can open without signing in. Returns url, snapshotUrl (the vertical JPEG image), message (text with the report link) and status. If a link already exists, return it as-is. Set updatePreview when asked to share the latest saved report at that same link. The browser Share dialog prepares the latest saved preview automatically and offers View snapshot, Copy image & text and WhatsApp; MCP returns assets without opening chats or writing the clipboard. Review missing-data warnings before acknowledging them. Keep both URLs private to intended recipients.',
     inputSchema: { ...shareInput, updatePreview: z.boolean().optional() },
     annotations: { readOnlyHint: false, destructiveHint: true, openWorldHint: true },
   }, async ({ reportId, updatePreview, acknowledgeMissing }) => {
@@ -91,7 +92,8 @@ export function registerReports(server: McpServer) {
       ? share
       : await callAgentApi<{ token: string }>('reports_publish', { reportId, acknowledgeMissing });
     const url = new URL(`/shared-reports/${encodeURIComponent(token)}`, appUrl).href;
-    return textResult({ url, status: active ? (updatePreview ? 'updated' : 'existing') : 'created' });
+    const snapshotUrl = new URL(`/shared-report-preview/${encodeURIComponent(token)}`, appUrl).href;
+    return textResult({ url, snapshotUrl, message: `Here’s the report.\n${url}`, status: active ? (updatePreview ? 'updated' : 'existing') : 'created' });
   });
   tool('reports_publish', 'Compatibility tool for clients that need the legacy share token. Use reports_share for current workflows. This action creates or updates a public preview link and requires authorization. Review missing data before acknowledging warnings.', shareInput, false, true);
   tool('reports_revoke', 'Turn off the report’s public preview link. Creating a link again generates a new token.', report, false, true);
