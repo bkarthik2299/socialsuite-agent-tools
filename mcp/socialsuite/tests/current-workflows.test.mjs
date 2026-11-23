@@ -6,6 +6,19 @@ import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js'
 
 test('Analytics AI requires credit authorization and returns the receipt, while deadlines use the read route', async () => {
   const requests = [];
+  const period = { start: '2026-11-01', end: '2026-11-08' };
+  const evidence = [
+    {
+      id: 'E1', title: 'Meta Ads · Main account · custom query', source: 'meta_ads', period,
+      origin: 'provider', currency: 'INR', warnings: ['Windsor returned no rows for the second account.'],
+      data: { resourceLabel: 'Main account', rows: [{ placement: 'Feed', spend: 240 }] },
+    },
+    {
+      id: 'E2', title: 'Meta Ads · Second account · custom query', source: 'meta_ads', period,
+      origin: 'provider', currency: null, warnings: ['Windsor returned no rows for the requested fields and period.'],
+      data: { resourceLabel: 'Second account', rows: [] },
+    },
+  ];
   const http = createServer(async (req, res) => {
     const chunks = [];
     for await (const chunk of req) chunks.push(chunk);
@@ -26,7 +39,7 @@ test('Analytics AI requires credit authorization and returns the receipt, while 
     res.write('{"type":"heartbeat"}\n');
     res.write(chunk.subarray(0, split));
     res.write(chunk.subarray(split));
-    res.write('{"type":"evidence","evidence":{"source":"google_ads"}}\n');
+    for (const entry of evidence) res.write(JSON.stringify({ type: 'evidence', evidence: entry }) + '\n');
     res.end('{"type":"done","model":"test-model","creditsCharged":0.5,"creditsRemaining":3.5}');
   });
   await new Promise(resolve => http.listen(0, '127.0.0.1', resolve));
@@ -43,7 +56,7 @@ test('Analytics AI requires credit authorization and returns the receipt, while 
     assert.equal(tools.find(tool => tool.name === deadlinesTool).annotations.readOnlyHint, true);
     const input = {
       clientId: '10000000-0000-4000-8000-000000000001', requestId: '10000000-0000-4000-8000-000000000002',
-      period: { start: '2026-11-01', end: '2026-11-08' }, messages: [{ role: 'user', content: 'How much was spent?' }],
+      period, section: 'meta_ads', messages: [{ role: 'user', content: 'Show Meta Ads spend by placement for each account.' }],
       authorizeCredits: true,
     };
     for (const args of [{ ...input, authorizeCredits: false }, { ...input, messages: [{ role: 'assistant', content: 'No question' }] }]) {
@@ -53,18 +66,19 @@ test('Analytics AI requires credit authorization and returns the receipt, while 
     assert.equal(requests.length, 0);
     const result = await client.callTool({ name: analyticsTool, arguments: input });
     assert.ok(!result.isError, result.content[0].text);
+    assert.deepEqual(requests[0], { action: 'analytics_ai_ask', input });
     assert.deepEqual(JSON.parse(result.content[0].text), {
-      requestId: input.requestId, answer: 'Spend was ₹240.', evidence: [{ source: 'google_ads' }],
+      requestId: input.requestId, answer: 'Spend was ₹240.', evidence,
       model: 'test-model', creditsCharged: 0.5, creditsRemaining: 3.5,
     });
     const interrupted = await client.callTool({ name: analyticsTool, arguments: { ...input, messages: [{ role: 'user', content: 'Interrupt' }] } });
     assert.equal(interrupted.isError, true);
     assert.match(interrupted.content[0].text, /did not return a completion receipt/);
     assert.equal(requests.length, 2, 'An interrupted paid request must not be retried automatically');
-    const period = { from: '2026-11-01', to: '2026-11-08', limit: 2, offset: 2 };
-    const deadlines = await client.callTool({ name: deadlinesTool, arguments: period });
+    const deadlineFilter = { from: '2026-11-01', to: '2026-11-08', limit: 2, offset: 2 };
+    const deadlines = await client.callTool({ name: deadlinesTool, arguments: deadlineFilter });
     assert.ok(!deadlines.isError, deadlines.content[0].text);
-    assert.deepEqual(requests.at(-1), { action: 'list_task_deadlines', input: period });
+    assert.deepEqual(requests.at(-1), { action: 'list_task_deadlines', input: deadlineFilter });
     assert.equal(JSON.parse(deadlines.content[0].text).nextOffset, 4);
   } finally {
     await client.close();

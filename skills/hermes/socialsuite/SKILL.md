@@ -2,7 +2,7 @@
 name: socialsuite
 description: Use SocialSuite MCP tools to manage workspace content, brand guides, Super AI chats and drafts, Analytics, DIY Reports with manual data and branding, Image Studio, tasks, calendar, notes, and client reviews from MCP-compatible agents.
 metadata:
-  version: "1.6.6"
+  version: "1.6.7"
   author: SocialSuite
   hermes:
     tags: [socialsuite, social-media, mcp, campaigns, brand-guides]
@@ -29,7 +29,7 @@ Prefer workflow-specific tools over generic row tools:
 
 - Workspace overview: `socialsuite_workspace_overview`
 - Super AI (the current app chat workflow): read [references/super-ai.md](references/super-ai.md) for chats, credit quotes, generation, research, draft revisions, saving, undo and sharing.
-- Analytics: read [references/analytics.md](references/analytics.md) for dashboards, paid Analytics AI answers, client/source setup, SEO credits and data interpretation.
+- Analytics: read [references/analytics.md](references/analytics.md) for dashboards, paid Analytics AI answers and Windsor breakdowns, client/source setup, SEO credits and data interpretation.
 - DIY Reports: read [references/reports.md](references/reports.md) before building, editing or sharing. Use `socialsuite_reports_share` for the sign-in-free report preview.
 - Create/find project: `socialsuite_ensure_project`
 - Create/find folder: `socialsuite_ensure_folder`

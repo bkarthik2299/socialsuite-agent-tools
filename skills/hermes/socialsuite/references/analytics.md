@@ -10,6 +10,10 @@ Use the dashboard for direct report reads. When the user asks for an Analytics A
 
 Call `socialsuite_analytics_ai_ask` with the scoped `clientId`, a new UUID `requestId`, an inclusive `period` ending on a completed UTC day, `messages` ending with a user question, and `authorizeCredits: true`. Use `section: "overview"` or an available source ID. `responseFormat: "message"` prepares text for sharing. Use the returned evidence and credit receipt to explain the result. Keep the request ID if completion is uncertain. The backend rejects duplicate IDs, and an automatic retry with a fresh ID could spend another 0.5 credits. Let the caller finish before starting another question. Configure the MCP host to allow at least 150 seconds for the tool if it uses a shorter default timeout.
 
+On the backend from app PR #151 or later, Analytics AI can look up additional fields for the client's connected Windsor sources. Name the source, metrics, breakdown and any campaign in the question. For example, ask for GA4 sessions by browser, Meta Ads spend by placement, or Google Ads clicks, spend and conversions by age and by gender for the same dates. The existing `socialsuite_analytics_ai_ask` tool handles field discovery and data retrieval within that request. SE Ranking uses its existing SEO reports. The `analytics-ai` capability alone only confirms the base workflow.
+
+Keep account and location evidence separate. For Google Ads demographics, report age and gender separately and identify unknown or unclassified rows. Preserve evidence IDs, actual dates, currency and provider warnings in the answer. If a field or account returns partial or missing data, identify which breakdown is affected and report the available results. Use separately retrieved totals for unique metrics and ratios.
+
 ## Clients and sources
 
 For client setup:
