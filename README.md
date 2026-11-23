@@ -6,7 +6,7 @@ The maintained MCP connector and portable Social Suite skill for Hermes and othe
 
 **Separate public repository:** https://github.com/bkarthik2299/socialsuite-agent-tools
 
-Connector **0.7.6** exposes **154 tools**, with portable skill **1.6.6**. It uses a SocialSuite Agent API key.
+Connector **0.7.7** exposes **154 tools**, with portable skill **1.6.7**. It uses a SocialSuite Agent API key.
 
 ## Install
 
@@ -78,6 +78,8 @@ Use the capabilities reported by `socialsuite_whoami` to check feature availabil
 Read the [skill](skills/hermes/socialsuite/SKILL.md) for feature workflows. Super AI, Analytics and Reports preserve app permissions and private data boundaries through the same authenticated backend functions. They are not exposed through generic table access. Super AI worker and streaming endpoints are not MCP tools; poll request/thread tools instead. UI-only features such as chart layout, metric selection, Google sign-in and marketing navigation do not need MCP mutation tools. Saving campaign drafts does not publish to social networks.
 
 ## Upgrade
+
+Release 0.7.7 updates `socialsuite_analytics_ai_ask` and the [Analytics skill reference](skills/hermes/socialsuite/references/analytics.md) for custom Windsor breakdowns, including Google Ads age and gender reporting. The existing tool returns separate evidence for connected accounts and breakdowns, including provider warnings. Expanded reporting requires the Agent API backend from [app PR #151](https://github.com/bkarthik2299/social-suite-app/pull/151) or later. The tool inputs and completion cost of 0.5 credits are unchanged.
 
 Release 0.7.6 preserves the per-table `layout` field (`horizontal` or `transposed`, labelled Vertical in the app) during MCP saves. `socialsuite_reports_share` now also returns `snapshotUrl` for the vertical JPEG and a ready-to-use `message` with the report link. Existing `url`/`status` and explicit `updatePreview` behavior are retained. Skill 1.6.6 covers the icon-only layout controls, compact vertical snapshots independent of the saved table orientation, aligned values, report-only branding, automatic browser Share preparation, clickable image preview and **Copy image & text** / WhatsApp actions. Layout support requires the Reports backend from app PR #147 or later; the server image route requires the frontend/server deployment from PR #144 or later. This release needs no new API action or database migration.
 

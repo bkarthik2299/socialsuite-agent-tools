@@ -60,14 +60,15 @@ export function registerWorkflows(server: McpServer) {
   tool('analytics_bootstrap', 'List workspace analytics clients, connections, active mappings, projects and portal clients.', {}, true);
   tool('analytics_dashboard', 'Read client reports for explicit inclusive YYYY-MM-DD dates, optionally compared with the previous period. Missing reports are queued by the app; inspect report readiness/errors before interpreting metrics.', period, true);
   server.registerTool('socialsuite_analytics_ai_ask', {
-    description: 'Ask Analytics AI to analyze one client’s connected metrics or prepare a shareable answer. A completed response costs 0.5 credits. Require the analytics-ai capability, enabled Analytics AI for the workspace, a write key and authorization to spend. Submit a UUID requestId and retain it after interruption. The response includes evidence and the credit receipt.',
+    description: 'Ask Analytics AI to analyze one client’s connected data or prepare a shareable answer. On a current backend, ask for specific Windsor breakdowns such as GA4 sessions by browser, Meta Ads by placement, or Google Ads by age and gender. Use the returned evidence and warnings per account and breakdown. A completed response costs 0.5 credits. Require the analytics-ai capability, enabled Analytics AI for the workspace, a write key and authorization to spend. Submit a UUID requestId and retain it after interruption. The response includes the credit receipt.',
     inputSchema: {
       requestId: id, clientId: id,
       period: z.object({ start: z.iso.date(), end: z.iso.date() }).refine(range => range.start <= range.end, 'Choose an inclusive date range in order.'),
       section: z.union([z.literal('overview'), source]).optional(),
       responseFormat: z.enum(['analysis', 'message']).optional(),
       messages: z.array(z.discriminatedUnion('role', [
-        z.object({ role: z.literal('user'), content: z.string().trim().min(1).max(6000) }),
+        z.object({ role: z.literal('user'), content: z.string().trim().min(1).max(6000)
+          .describe('Name the source, requested metrics and breakdown, and the campaign when relevant.') }),
         z.object({ role: z.literal('assistant'), content: z.string().trim().min(1).max(18000) }),
       ])).min(1).max(20).refine(messages => messages.at(-1)?.role === 'user' && messages.reduce((total, message) => total + message.content.length, 0) <= 36000,
         'Use a shorter conversation ending with a user question.'),
