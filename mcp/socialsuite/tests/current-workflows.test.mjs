@@ -4,6 +4,71 @@ import { createServer } from 'node:http';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js';
 
+test('SEO dashboard details return scoped provider rows with dates, warnings and job state', async () => {
+  const range = { start: '2026-11-01', end: '2026-11-08' };
+  const previous = { start: '2026-10-24', end: '2026-10-31' };
+  const input = { clientId: '10000000-0000-4000-8000-000000000001', ...range, compare: true };
+  const organic = { label: 'Organic Search', metrics: { sessions: 0, keyEvents: null } };
+  const keyword = { label: 'example keyword', metrics: { averageRank: null }, dimensions: { date: range.end } };
+  const report = (id, source, provider, period, breakdowns) => ({
+    id, mapping_id: source, start_date: period.start, end_date: period.end,
+    data: { source, provider, period, resourceId: id, timezone: 'Source', dataThrough: period.end, warnings: ['Check coverage'], totals: { sessions: 99 }, breakdowns },
+  });
+  const fixture = {
+    period: range, previous,
+    mappings: [
+      { id: 'ga4', source: 'ga4' },
+      { id: 'seo', source: 'seo', config: { engine_id: 'engine-a' } },
+      { id: 'google_ads', source: 'google_ads' },
+    ],
+    reports: [
+      report('traffic', 'ga4', 'windsor', range, { sessionDefaultChannelGroup: [{ label: 'Paid Search', metrics: { sessions: 99 } }, organic] }),
+      report('previous', 'ga4', 'windsor', previous, { sessionDefaultChannelGroup: [{ label: 'Organic Social' }] }),
+      report('rankings', 'seo', 'seranking', range, { keywords: [keyword] }),
+      report('legacy', 'seo', 'windsor', previous, {}),
+    ],
+    jobs: [{ mapping_id: 'ga4', status: 'queued' }, { mapping_id: 'google_ads', status: 'failed' }],
+  };
+  const requests = [];
+  const http = createServer(async (req, res) => {
+    const chunks = [];
+    for await (const chunk of req) chunks.push(chunk);
+    requests.push(JSON.parse(Buffer.concat(chunks).toString()));
+    res.setHeader('Content-Type', 'application/json');
+    res.end(JSON.stringify({ result: fixture }));
+  });
+  await new Promise(resolve => http.listen(0, '127.0.0.1', resolve));
+  const client = new Client({ name: 'seo-dashboard-test', version: '1.0.0' });
+  try {
+    await client.connect(new StdioClientTransport({ command: process.execPath, args: ['dist/api-key-index.js'], env: {
+      ...process.env, SOCIALSUITE_API_KEY: 'ss_read_seo_test',
+      SOCIALSUITE_AGENT_API_URL: `http://127.0.0.1:${http.address().port}`,
+    } }));
+    const call = async args => {
+      const result = await client.callTool({ name: 'socialsuite_analytics_dashboard', arguments: args });
+      assert.ok(!result.isError, result.content[0].text);
+      return JSON.parse(result.content[0].text);
+    };
+    assert.deepEqual(await call(input), fixture);
+    const traffic = await call({ ...input, detail: 'ga4_organic_search' });
+    assert.deepEqual(traffic.mappings, [fixture.mappings[0]]);
+    assert.deepEqual(traffic.jobs, [fixture.jobs[0]]);
+    assert.deepEqual(traffic.reports.map(row => row.data.breakdowns.sessionDefaultChannelGroup), [[organic], []]);
+    assert.deepEqual(traffic.reports.map(row => row.data.period), [range, previous]);
+    assert.equal(traffic.reports[0].data.dataThrough, range.end);
+    assert.deepEqual(traffic.reports[0].data.warnings, ['Check coverage']);
+    assert.equal(traffic.reports[0].data.totals, undefined);
+    const rankings = await call({ ...input, detail: 'seo_keyword_rankings' });
+    assert.deepEqual(rankings.mappings, [fixture.mappings[1]]);
+    assert.deepEqual(rankings.reports.map(row => row.id), ['rankings']);
+    assert.deepEqual(rankings.reports[0].data.breakdowns.keywords, [keyword]);
+    assert.deepEqual(requests, Array.from({ length: 3 }, () => ({ action: 'analytics_dashboard', input })));
+  } finally {
+    await client.close();
+    await new Promise(resolve => http.close(resolve));
+  }
+});
+
 test('note tools preserve note data and link to the matching workspace and app', async () => {
   const requests = [];
   const note = { id: 'note-1', org_id: 'workspace-2', title: 'Planning', content: [] };

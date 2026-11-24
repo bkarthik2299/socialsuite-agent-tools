@@ -4,6 +4,8 @@ Use `socialsuite_analytics_bootstrap` to discover workspace clients, connections
 
 Read reports with `socialsuite_analytics_dashboard`, client ID, inclusive `start`/`end` dates in YYYY-MM-DD and optional `compare: true`. Reports may be queued or stale; inspect each report's readiness, errors, timezone, data-through date and warnings. Missing metrics are unavailable, not zero. The dashboard may enqueue missing reports, just as the app does, even for a read key. Avoid claiming live provider access or interpreting incomplete periods as final totals.
 
+Connector 0.7.9 adds the optional dashboard `detail` argument. Use `ga4_organic_search` for `reports[].data.breakdowns.sessionDefaultChannelGroup` filtered to `Organic Search`, or `seo_keyword_rankings` for `reports[].data.breakdowns.keywords` from SE Ranking. Match each report's `mapping_id` and dates to the intended property or project/engine and period. Empty rows can indicate pending or unavailable provider data. These views use the existing dashboard action and preserve source warnings and job status. For using those rows in a DIY Report, follow [SEO metrics and tables](reports.md#seo-metrics-and-tables).
+
 ## Analytics AI
 
 Use the dashboard for direct report reads. When the user asks for an Analytics AI analysis or a shareable answer, require `analytics-ai` in `socialsuite_whoami` and `configuration.analyticsAi` in `socialsuite_analytics_bootstrap`. A completed answer costs 0.5 Social Suite credits and requires a write key and authorization to spend.
