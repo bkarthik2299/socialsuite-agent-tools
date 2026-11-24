@@ -7,9 +7,23 @@ Require `diy-reports` in `socialsuite_whoami.capabilities` and Reports actions i
 ## Discover and construct
 
 1. Read `socialsuite_analytics_bootstrap` for the actual Analytics client ID and project links, then `socialsuite_reports_list`. A project ID is not a client ID. For an existing report read `socialsuite_reports_get` before editing.
-2. Read `socialsuite_reports_catalog` with `clientId`. Categories contain metrics grouped by source/account. Copy each metric's key, field, aggregation, currency and owning `mappingId`. Do not guess aliases. Missing/unsupported metrics remain unavailable, never zero. A disconnected account needs the existing Analytics connection workflow.
+2. Read `socialsuite_reports_catalog` with `clientId`. Categories contain metrics grouped by source/account. Copy each metric's key, field, aggregation, currency and owning `mappingId`, and verify that its `grains` includes the dataset grain. Missing metrics stay unavailable. A disconnected account needs the existing Analytics connection workflow.
 3. For a new report read `socialsuite_reports_defaults`, generate fresh UUIDs for the report, datasets, columns and blocks, and save with revision `-1`. For an existing report use the exact `report.revision` from `socialsuite_reports_get` and retain its existing IDs, datasets and manual values. `socialsuite_reports_save` replaces the saved draft atomically. On a revision conflict, read the latest draft and reapply only the requested edits.
 4. Read `socialsuite_reports_data` to inspect cached metrics, jobs and warnings. Explicitly requested refresh uses `socialsuite_reports_refresh`; poll `reports_data` with a delay while jobs are queued/running. This uses the existing Analytics sync/cooldown; it does not spend SocialSuite AI generation credits. Cache refresh does not change manual inputs.
+
+## SEO metrics and tables
+
+Check the Reports catalog for a live binding first. The current Reports API supports account totals, monthly values and campaigns for supported ad accounts. GA4 channel breakdowns and individual SE Ranking keyword rows are available through the dashboard.
+
+| Requested item | Read from Analytics | Use in Reports |
+| --- | --- | --- |
+| GA4 organic traffic | Call `socialsuite_analytics_dashboard` with `detail: "ga4_organic_search"`. Use `metrics.sessions` from the `Organic Search` row for the intended GA4 property and dates. | With the user's agreement, populate a dated manual KPI from the returned row. Leave the value unavailable when the row or metric is missing. |
+| Individual keyword rankings | Use `detail: "seo_keyword_rankings"` for the intended SE Ranking project and engine. The rows contain the keyword label, latest checked position in `metrics.averageRank`, movement in `metrics.rankChange` where available, and check date in `dimensions.date`. | With the user's agreement, populate a dated manual custom table. Preserve missing ranks as blank and retain the check dates. Search Console query average position is a separate metric. |
+| Organic website leads | Identify the saved website lead source and definition, along with lead-specific attribution or matching paid website leads. Scope to the same client, dates, conversion actions, counting rules and attribution. | Prefer a directly attributed organic website lead count. Subtract paid leads only for a documented residual metric with matching coverage and deduplication. Other channels may contribute to that residual. Keep the KPI pending when the required inputs are unverified. Generic GA4 key events and Google Ads conversions are insufficient on their own. |
+
+Wait for queued dashboard data and inspect provider warnings and coverage before importing. Label any agreed snapshot with its source, reporting period and data-through or check date. Snapshot values only change when explicitly updated. If a binding is unavailable, preserve existing blocks and manual values, report the exact gap and ask before replacing data or removing anything. For a new draft, leave unsupported items pending and continue with the data that can be verified.
+
+## Draft schema
 
 `reports_save` accepts `{reportId, clientId, revision, document, datasets}`. `document` contains `name`, `description`, `period: {start,end}`, `comparison` (`none`, `previous`, `year`), `branding` and `blocks`. Dates are inclusive `YYYY-MM-DD`, up to 366 days. `branding` has `agencyLogo`, `clientLogo`, six-digit `accent` hex, `font` (`Inter`, `Georgia`, `Arial`) and `footer`. Use empty strings for absent logos. The report title uses a standard sans-serif face; the selected font controls report content.
 

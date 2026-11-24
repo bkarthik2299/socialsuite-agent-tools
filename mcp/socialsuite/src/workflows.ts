@@ -11,6 +11,24 @@ const source = z.enum(['ga4', 'gsc', 'gbp', 'google_ads', 'meta_ads', 'seo', 'in
 const connectableSource = source;
 const period = { clientId: id, start: z.iso.date(), end: z.iso.date(), compare: z.boolean().optional() };
 
+type DashboardDetail = {
+  mappings: { id: string; source: string }[];
+  jobs: { mapping_id: string }[];
+  reports: {
+    mapping_id: string;
+    data: {
+      provider: string;
+      source: string;
+      resourceId: string;
+      period: unknown;
+      timezone: string;
+      dataThrough: string | null;
+      warnings: string[];
+      breakdowns: Record<string, { label: string }[]>;
+    };
+  }[];
+};
+
 export function registerWorkflows(server: McpServer) {
   const tool = (action: string, description: string, schema: Record<string, z.ZodType> = {}, readOnly = false) =>
     server.registerTool(`socialsuite_${action}`, {
@@ -58,7 +76,32 @@ export function registerWorkflows(server: McpServer) {
   tool('super_ai_branch', 'Branch chat history before a selected message into a new chat. Does not start generation.', { ...conversation, messageId: id });
 
   tool('analytics_bootstrap', 'List workspace analytics clients, connections, active mappings, projects and portal clients.', {}, true);
-  tool('analytics_dashboard', 'Read client reports for explicit inclusive YYYY-MM-DD dates, optionally compared with the previous period. Missing reports are queued by the app; inspect report readiness/errors before interpreting metrics.', period, true);
+  server.registerTool('socialsuite_analytics_dashboard', {
+    description: 'Read client reports for inclusive YYYY-MM-DD dates, optionally with the previous period. For SEO reporting, use detail: ga4_organic_search for the GA4 Organic Search channel row or seo_keyword_rankings for SE Ranking tracked keyword rows. These are dashboard reads and can supply dated report snapshots. Use reports_catalog to discover live Reports bindings. Inspect jobs, source warnings and data-through dates before using rows. An empty result is unavailable.',
+    inputSchema: { ...period, detail: z.enum(['ga4_organic_search', 'seo_keyword_rankings']).optional() },
+    annotations: { readOnlyHint: true },
+  }, async ({ detail, ...input }) => {
+    if (!detail) return textResult(await callAgentApi('analytics_dashboard', input));
+
+    const dashboard = await callAgentApi<DashboardDetail>('analytics_dashboard', input);
+    const organic = detail === 'ga4_organic_search';
+    const mappings = dashboard.mappings.filter(mapping => mapping.source === (organic ? 'ga4' : 'seo'));
+    const mappingIds = new Set(mappings.map(mapping => mapping.id));
+    const breakdown = organic ? 'sessionDefaultChannelGroup' : 'keywords';
+    const reports = dashboard.reports.filter(report => mappingIds.has(report.mapping_id) &&
+      (organic || report.data.provider === 'seranking')).map(report => {
+      const { provider, source, resourceId, period, timezone, dataThrough, warnings, breakdowns } = report.data;
+      const rows = breakdowns?.[breakdown] ?? [];
+      return {
+        ...report,
+        data: {
+          provider, source, resourceId, period, timezone, dataThrough, warnings,
+          breakdowns: { [breakdown]: organic ? rows.filter(row => row.label === 'Organic Search') : rows },
+        },
+      };
+    });
+    return textResult({ ...dashboard, mappings, jobs: dashboard.jobs.filter(job => mappingIds.has(job.mapping_id)), reports });
+  });
   server.registerTool('socialsuite_analytics_ai_ask', {
     description: 'Ask Analytics AI to analyze one client’s connected data or prepare a shareable answer. On a current backend, ask for specific Windsor breakdowns such as GA4 sessions by browser, Meta Ads by placement, or Google Ads by age and gender. Use the returned evidence and warnings per account and breakdown. A completed response costs 0.5 credits. Require the analytics-ai capability, enabled Analytics AI for the workspace, a write key and authorization to spend. Submit a UUID requestId and retain it after interruption. The response includes the credit receipt.',
     inputSchema: {

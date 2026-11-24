@@ -6,7 +6,7 @@ The maintained MCP connector and portable Social Suite skill for Hermes and othe
 
 **Separate public repository:** https://github.com/bkarthik2299/socialsuite-agent-tools
 
-Connector **0.7.8** exposes **154 tools**, with portable skill **1.6.8**. It uses a SocialSuite Agent API key.
+Connector **0.7.9** exposes **154 tools**, with portable skill **1.6.9**. It uses a SocialSuite Agent API key.
 
 ## Install
 
@@ -78,6 +78,8 @@ Use the capabilities reported by `socialsuite_whoami` to check feature availabil
 Read the [skill](skills/hermes/socialsuite/SKILL.md) for feature workflows. Super AI, Analytics and Reports preserve app permissions and private data boundaries through the same authenticated backend functions. They are not exposed through generic table access. Super AI worker and streaming endpoints are not MCP tools; poll request/thread tools instead. UI-only features such as chart layout, metric selection, Google sign-in and marketing navigation do not need MCP mutation tools. Saving campaign drafts does not publish to social networks.
 
 ## Upgrade
+
+Release 0.7.9 adds focused GA4 Organic Search and SE Ranking keyword reads to `socialsuite_analytics_dashboard`. The [Reports skill reference](skills/hermes/socialsuite/references/reports.md#seo-metrics-and-tables) covers live metric discovery, dated snapshots, and the lead inputs required for organic website attribution. The connector uses existing Agent API actions.
 
 Release 0.7.8 returns a workspace-scoped `noteUrl` when listing, creating, or updating notes. Opening the link requires access to the note's workspace and the frontend from [app PR #157](https://github.com/bkarthik2299/social-suite-app/pull/157) or later. The skill covers collaborative Notes, task notifications from [app PR #156](https://github.com/bkarthik2299/social-suite-app/pull/156), and UTC monthly AI credit renewals from [app PR #159](https://github.com/bkarthik2299/social-suite-app/pull/159). `socialsuite_list_ai_credits` reads the current account balance and period. Detailed monthly usage and the notification inbox are available in the app. The connector uses the existing Agent API actions.
 
