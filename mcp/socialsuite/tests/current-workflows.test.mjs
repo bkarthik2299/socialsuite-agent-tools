@@ -4,6 +4,49 @@ import { createServer } from 'node:http';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js';
 
+test('note tools preserve note data and link to the matching workspace and app', async () => {
+  const requests = [];
+  const note = { id: 'note-1', org_id: 'workspace-2', title: 'Planning', content: [] };
+  const http = createServer(async (req, res) => {
+    const chunks = [];
+    for await (const chunk of req) chunks.push(chunk);
+    const body = JSON.parse(Buffer.concat(chunks).toString());
+    requests.push(body);
+    const result = body.action === 'list_notes' ? { notes: [note] } : { note };
+    res.setHeader('Content-Type', 'application/json');
+    res.end(JSON.stringify({ result }));
+  });
+  await new Promise(resolve => http.listen(0, '127.0.0.1', resolve));
+  try {
+    for (const appUrl of ['https://staging.example', '']) {
+      const client = new Client({ name: 'note-links-test', version: '1.0.0' });
+      const transport = new StdioClientTransport({ command: process.execPath, args: ['dist/api-key-index.js'], env: {
+        ...process.env, SOCIALSUITE_API_KEY: 'ss_write_workflows_test',
+        SOCIALSUITE_AGENT_API_URL: `http://127.0.0.1:${http.address().port}`,
+        SOCIALSUITE_APP_URL: appUrl,
+      } });
+      try {
+        await client.connect(transport);
+        const expected = appUrl ? { ...note, noteUrl: `${appUrl}/tools/notes?note=note-1&org=workspace-2` } : note;
+        for (const [action, input] of [
+          ['list_notes', { limit: 5 }],
+          ['create_note', { title: 'Planning', text: 'New note' }],
+          ['update_note', { noteId: note.id, updates: { title: 'Planning' } }],
+        ]) {
+          const result = await client.callTool({ name: `socialsuite_${action}`, arguments: input });
+          assert.ok(!result.isError, result.content[0].text);
+          assert.deepEqual(requests.at(-1), { action, input });
+          assert.deepEqual(JSON.parse(result.content[0].text), action === 'list_notes' ? { notes: [expected] } : { note: expected });
+        }
+      } finally {
+        await client.close();
+      }
+    }
+  } finally {
+    await new Promise(resolve => http.close(resolve));
+  }
+});
+
 test('Analytics AI requires credit authorization and returns the receipt, while deadlines use the read route', async () => {
   const requests = [];
   const period = { start: '2026-11-01', end: '2026-11-08' };

@@ -35,6 +35,8 @@ Reports include spend, clicks, impressions, CTR, CPC, CPM and campaign breakdown
 
 Preserve each report's currency code: no currency conversion or combined spend across different currencies. Do not sum Google and Meta conversions as deduplicated totals. Missing values are unavailable; ratios with zero denominators are unavailable. Inspect warnings, reporting timezones and attribution before comparing sources.
 
+Google Ads sync can retain account totals, daily trends and campaign data when Windsor returns ambiguous ad or ad-group details. If the report flags an optional detail warning, identify the affected level and use the available core results. A provider authorization error still blocks sync.
+
 Use inclusive completed UTC dates. Dashboard custom ranges allow up to 366 days. For **All time** use `start: "2000-01-01"` and the latest completed UTC day. Account retention limits coverage and All time has no previous-period comparison. Cached reports can remain after disconnect; disconnect stops SocialSuite sync but does not revoke the upstream Windsor/provider grant. Archive retains reports and stops synchronization. For provider access revocation, direct the user to Windsor/provider settings.
 
 ## Organic social analytics

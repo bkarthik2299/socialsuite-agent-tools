@@ -6,7 +6,7 @@ The maintained MCP connector and portable Social Suite skill for Hermes and othe
 
 **Separate public repository:** https://github.com/bkarthik2299/socialsuite-agent-tools
 
-Connector **0.7.7** exposes **154 tools**, with portable skill **1.6.7**. It uses a SocialSuite Agent API key.
+Connector **0.7.8** exposes **154 tools**, with portable skill **1.6.8**. It uses a SocialSuite Agent API key.
 
 ## Install
 
@@ -25,7 +25,7 @@ Create `mcp/socialsuite/.env` from `.env.example` and set:
 SOCIALSUITE_API_KEY=your_own_socialsuite_api_key
 ```
 
-Create a key in SocialSuite **My Account → Agent API Keys**, or the app's **Social Suite MCP** setup page. Read keys inspect data. Write actions also require workspace editor/admin access. For staging or self-hosting, use `SOCIALSUITE_AGENT_API_URL` for the backend. Set `SOCIALSUITE_APP_URL` to the matching browser origin to share reports on that instance.
+Create a key in SocialSuite **My Account → Agent API Keys**, or the app's **Social Suite MCP** setup page. Read keys inspect data. Write actions also require workspace editor/admin access. For staging or self-hosting, use `SOCIALSUITE_AGENT_API_URL` for the backend. Set `SOCIALSUITE_APP_URL` to the matching browser origin for note links and report sharing on that instance.
 
 Never commit `.env`, passwords, API keys, service-role keys or generated session tokens. Each person uses their own key. Client-provided environment variables take precedence over `.env`.
 
@@ -78,6 +78,8 @@ Use the capabilities reported by `socialsuite_whoami` to check feature availabil
 Read the [skill](skills/hermes/socialsuite/SKILL.md) for feature workflows. Super AI, Analytics and Reports preserve app permissions and private data boundaries through the same authenticated backend functions. They are not exposed through generic table access. Super AI worker and streaming endpoints are not MCP tools; poll request/thread tools instead. UI-only features such as chart layout, metric selection, Google sign-in and marketing navigation do not need MCP mutation tools. Saving campaign drafts does not publish to social networks.
 
 ## Upgrade
+
+Release 0.7.8 returns a workspace-scoped `noteUrl` when listing, creating, or updating notes. Opening the link requires access to the note's workspace and the frontend from [app PR #157](https://github.com/bkarthik2299/social-suite-app/pull/157) or later. The skill covers collaborative Notes, task notifications from [app PR #156](https://github.com/bkarthik2299/social-suite-app/pull/156), and UTC monthly AI credit renewals from [app PR #159](https://github.com/bkarthik2299/social-suite-app/pull/159). `socialsuite_list_ai_credits` reads the current account balance and period. Detailed monthly usage and the notification inbox are available in the app. The connector uses the existing Agent API actions.
 
 Release 0.7.7 updates `socialsuite_analytics_ai_ask` and the [Analytics skill reference](skills/hermes/socialsuite/references/analytics.md) for custom Windsor breakdowns, including Google Ads age and gender reporting. The existing tool returns separate evidence for connected accounts and breakdowns, including provider warnings. Expanded reporting requires the Agent API backend from [app PR #151](https://github.com/bkarthik2299/social-suite-app/pull/151) or later. The tool inputs and completion cost of 0.5 credits are unchanged.
 

@@ -3,6 +3,7 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { z } from 'zod/v4';
+import { config } from './config.js';
 import { callAgentApi, textResult } from './gateway.js';
 import { registerExtensions } from './extensions.js';
 import { registerWorkflows } from './workflows.js';
@@ -68,11 +69,29 @@ const filterSchema = z.object({
 
 const server = new McpServer({
   name: 'socialsuite-api-key-mcp',
-  version: '0.7.7',
+  version: '0.7.8',
 });
 
 const gatewayTool = (action: string) => async (input: Record<string, unknown> = {}) =>
   textResult(await callAgentApi(action, input));
+
+const noteTool = (action: string) => async (input: Record<string, unknown> = {}) => {
+  type Note = { id: string; org_id: string };
+  const result = await callAgentApi<{ note?: Note; notes?: Note[] }>(action, input);
+  const appUrl = URL.canParse(config.appUrl) ? new URL(config.appUrl) : null;
+  if (!appUrl || !['http:', 'https:'].includes(appUrl.protocol) || appUrl.username || appUrl.password) {
+    return textResult(result);
+  }
+  const withLink = (note: Note) => {
+    if (!note.id || !note.org_id) return note;
+    const url = new URL('/tools/notes', appUrl);
+    url.search = new URLSearchParams({ note: note.id, org: note.org_id }).toString();
+    return { ...note, noteUrl: url.href };
+  };
+  if (result.note) result.note = withLink(result.note);
+  if (result.notes) result.notes = result.notes.map(withLink);
+  return textResult(result);
+};
 
 registerWorkflows(server);
 registerReports(server);
@@ -84,6 +103,7 @@ function registerGatewayTool(
   inputSchema: Record<string, z.ZodTypeAny>,
   action = name.replace(/^socialsuite_/, ''),
   readOnly = false,
+  handler = gatewayTool(action),
 ) {
   server.registerTool(
     name,
@@ -93,7 +113,7 @@ function registerGatewayTool(
       inputSchema,
       ...(readOnly ? { annotations: { readOnlyHint: true } } : {}),
     },
-    gatewayTool(action),
+    handler,
   );
 }
 
@@ -211,7 +231,7 @@ server.registerTool(
   'socialsuite_create_task',
   {
     title: 'Create SocialSuite task',
-    description: 'Create a SocialSuite task linked to org, project, folder, or campaign.',
+    description: 'Create a SocialSuite task linked to org, project, folder, or campaign. Assigning it to another member can send an in-app notification.',
     inputSchema: {
       ...taskUpdateFields,
       title: z.string().min(1),
@@ -240,7 +260,7 @@ server.registerTool(
   'socialsuite_create_note',
   {
     title: 'Create SocialSuite note',
-    description: 'Create a project or workspace note.',
+    description: 'Create a project or workspace note from plain text or BlockNote blocks. Returns a workspace-scoped noteUrl when the app origin is configured.',
     inputSchema: {
       title: z.string().min(1),
       text: z.string().default(''),
@@ -248,7 +268,7 @@ server.registerTool(
       content: z.array(z.unknown()).optional(),
     },
   },
-  gatewayTool('create_note'),
+  noteTool('create_note'),
 );
 
 server.registerTool(
@@ -394,7 +414,7 @@ registerGatewayTool(
 registerGatewayTool(
   'socialsuite_update_task',
   'Update SocialSuite task',
-  'Update a task card. Pass editable fields in updates or at the top level. Omitted fields stay unchanged; null clears optional fields. Use list_tasks members[].userId for assigneeId and stage ids for status. Returns the persisted task.',
+  'Update a task card. Pass editable fields in updates or at the top level. Omitted fields stay unchanged; null clears optional fields. Use list_tasks members[].userId for assigneeId and stage ids for status. Returns the persisted task. Assignment and due date changes can notify the assignee.',
   { taskId: z.string().min(1), ...taskUpdateFields, updates: taskUpdatesSchema.optional() },
   'update_task',
 );
@@ -434,7 +454,7 @@ registerGatewayTool(
 registerGatewayTool(
   'socialsuite_add_task_comment',
   'Add SocialSuite task comment',
-  'Add a comment or reply to a task.',
+  'Add a comment or reply to a task. The app can notify the assignee or the author of the parent comment. Plain @name text does not send a mention notification.',
   { taskId: z.string().min(1), body: z.string().min(1), parentId: z.string().nullable().optional() },
   'add_task_comment',
 );
@@ -496,18 +516,21 @@ registerGatewayTool(
 registerGatewayTool(
   'socialsuite_list_notes',
   'List SocialSuite notes',
-  'List workspace or project notes.',
+  'List workspace or project notes. Returns a workspace-scoped noteUrl on each note when the app origin is configured.',
   { projectId: z.string().nullable().optional(), limit: z.number().int().positive().max(250).default(100) },
   'list_notes',
   true,
+  noteTool('list_notes'),
 );
 
 registerGatewayTool(
   'socialsuite_update_note',
   'Update SocialSuite note',
-  'Update a note title, content, or project link.',
+  'Update a note title or project link, or replace its entire BlockNote content. Omit content for metadata-only edits. Replacing content can reset the collaborative editing session. Returns a workspace-scoped noteUrl when the app origin is configured.',
   { noteId: z.string().min(1), updates: jsonObjectSchema },
   'update_note',
+  false,
+  noteTool('update_note'),
 );
 
 registerGatewayTool(
@@ -764,7 +787,7 @@ registerGatewayTool(
 registerGatewayTool(
   'socialsuite_list_ai_credits',
   'List SocialSuite AI credits',
-  'Read the active workspace AI credit account.',
+  'Read the active workspace AI credit account, including remaining balance, monthly allowance and period start when available. On renewal-enabled backends, periods start on the first day of each UTC month. Monthly usage entries are available in the app Activity log.',
   {},
   'list_ai_credits',
   true,

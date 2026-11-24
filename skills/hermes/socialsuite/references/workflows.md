@@ -143,9 +143,15 @@ Use `socialsuite_create_calendar_event` only when a campaign ID is known. Calend
 
 For task deadlines in Calendar, check `calendar-task-deadlines` and call `socialsuite_list_task_deadlines` with inclusive `from` and `to` dates. Use `nextOffset` to continue. Change a deadline by updating its original task's `dueDate`. For older compatible backends, read active tasks and filter by `due_date`. Deleted-task and stage recovery is an operator workflow in the app backend.
 
+On notification-enabled backends, assigning a task to another member or changing their due date can notify the assignee. Posting a comment or reply can notify the assignee or parent comment author. Use the browser's task editor to select a member for an explicit `@` mention. Typed `@name` in an MCP comment is plain text. Recipients open or mark notifications read from the app's header inbox. `socialsuite_mark_task_comments_read` updates task discussion read markers only.
+
 ## Notes
 
 Use `socialsuite_create_note` for planning notes, research notes, or internal summaries. Link to `projectId` when the note belongs to a project. Use `socialsuite_list_notes`, `socialsuite_update_note`, and `socialsuite_delete_note` for note management.
+
+Use the returned `noteUrl` to open the note or share it with someone who already has access to its workspace. For custom Agent API hosts, configure `SOCIALSUITE_APP_URL` to get links for that instance. The browser's Notes editor supports live autosave, mergeable body edits, editor presence and cursors.
+
+When changing only the title or project, send only those fields in `updates`. An MCP edit with `updates.content` replaces the whole BlockNote document and can reset the collaboration history. Read the current note before an intentional replacement. Use the browser editor for live co-editing. Treat collaboration state and revision fields as internal app metadata.
 
 ## Feed Monitor
 
@@ -205,7 +211,9 @@ By default, list results omit encrypted passwords. Only request `includeEncrypte
 
 ## AI Agents And Credits
 
-Use `socialsuite_list_ai_credits` to check remaining credits. Use `socialsuite_list_ai_agents` before changing AI agents or workflows. Built-in agents cannot be deleted; custom workspace agents can be created, edited, deleted, and reordered with the dedicated AI agent tools.
+Use `socialsuite_list_ai_credits` to check `creditAccount.credits_remaining`, `monthly_allowance` and `period_started_at`. On renewal-enabled backends, credits renew on the first day of each UTC month. Use the workspace **Activity log** (`/activity`) for daily totals, itemized charges, pending holds and past months. The MCP balance tool does not return the usage ledger. Analytics AI completion receipts and SE Ranking API quota are covered in the [Analytics reference](analytics.md).
+
+Use `socialsuite_list_ai_agents` before changing AI agents or workflows. Built-in agents cannot be deleted. Use the dedicated AI agent tools to create, edit, delete or reorder custom workspace agents.
 
 ## Generic Tables
 
