@@ -34,12 +34,12 @@
 | Manage task comments/stages | `socialsuite_add_task_comment`, `socialsuite_delete_task_comment`, `socialsuite_mark_task_comments_read`, `socialsuite_save_task_stages` |
 | Manage calendar | `socialsuite_list_calendar_events`, `socialsuite_create_calendar_event`, `socialsuite_update_calendar_event`, `socialsuite_delete_calendar_event` |
 | Calendar task deadlines | `socialsuite_list_task_deadlines`, `socialsuite_update_task` |
-| Manage notes | `socialsuite_list_notes`, `socialsuite_create_note`, `socialsuite_update_note`, `socialsuite_delete_note` |
+| Manage notes and get private workspace links | `socialsuite_list_notes`, `socialsuite_create_note`, `socialsuite_update_note`, `socialsuite_delete_note` |
 | Manage Password Vault | `socialsuite_list_vault_credentials`, `socialsuite_create_vault_credential`, `socialsuite_update_vault_credential`, `socialsuite_delete_vault_credential` |
 | Manage Feed Monitor | `socialsuite_list_feed_monitor`, feed folder/post create/update/delete tools |
 | Manage Client Portal | `socialsuite_list_client_portal`, portal client/feed/review/comment tools |
 | Manage team/account | `socialsuite_list_team`, `socialsuite_invite_team_member`, `socialsuite_revoke_team_invite`, account profile/API key tools |
-| Check AI credits | `socialsuite_list_ai_credits` |
+| Check AI credit balance, allowance and period | `socialsuite_list_ai_credits` |
 | Manage AI agents/workflow | `socialsuite_list_ai_agents`, custom agent create/edit/delete tools, `socialsuite_save_ai_workflow` |
 | Start campaign AI mission | `socialsuite_start_campaign_mission` |
 | Poll AI run | `socialsuite_wait_for_ai_artifact` |

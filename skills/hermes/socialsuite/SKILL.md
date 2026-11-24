@@ -2,7 +2,7 @@
 name: socialsuite
 description: Use SocialSuite MCP tools to manage workspace content, brand guides, Super AI chats and drafts, Analytics, DIY Reports with manual data and branding, Image Studio, tasks, calendar, notes, and client reviews from MCP-compatible agents.
 metadata:
-  version: "1.6.7"
+  version: "1.6.8"
   author: SocialSuite
   hermes:
     tags: [socialsuite, social-media, mcp, campaigns, brand-guides]
@@ -45,11 +45,11 @@ Prefer workflow-specific tools over generic row tools:
 - Team membership: `socialsuite_update_team_member_role` and `socialsuite_remove_team_member` use membership IDs from `socialsuite_list_team`.
 - Tasks: `socialsuite_list_tasks`, `socialsuite_update_task`, `socialsuite_move_task`, task comment tools, and task stage tools
 - Calendar: use `socialsuite_list_calendar_events` for events and `socialsuite_list_task_deadlines` for dated tasks. See [Tasks and Calendar](references/workflows.md#tasks-and-calendar).
-- Notes: `socialsuite_list_notes`, `socialsuite_update_note`, `socialsuite_delete_note`
+- Notes: use `socialsuite_list_notes`, `socialsuite_create_note`, `socialsuite_update_note` and `socialsuite_delete_note`. See [Notes](references/workflows.md#notes) for private links and collaborative editing.
 - Password Vault: `socialsuite_list_vault_credentials`, `socialsuite_create_vault_credential`, `socialsuite_update_vault_credential`, `socialsuite_delete_vault_credential`
 - Feed Monitor: `socialsuite_list_feed_monitor` and matching feed folder/post tools
 - Client Portal: `socialsuite_list_client_portal` and matching portal client/feed/review/comment tools
-- Team/account/settings: `socialsuite_list_team`, invite/revoke tools, account profile tools, account API key tools, and `socialsuite_list_ai_credits`
+- Team/account/settings: `socialsuite_list_team`, invite/revoke tools, account profile tools and account API key tools. See [AI Agents and Credits](references/workflows.md#ai-agents-and-credits) for the balance, monthly renewals and Activity log.
 - AI customization/history: `socialsuite_list_ai_agents`, custom agent tools, workflow tools, and `socialsuite_delete_ai_run`
 
 Use generic table tools only when no specific workflow tool exists:
