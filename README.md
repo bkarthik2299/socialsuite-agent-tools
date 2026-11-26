@@ -6,7 +6,7 @@ The maintained MCP connector and portable Social Suite skill for Hermes and othe
 
 **Separate public repository:** https://github.com/bkarthik2299/socialsuite-agent-tools
 
-Connector **0.7.9** exposes **154 tools**, with portable skill **1.6.9**. It uses a SocialSuite Agent API key.
+Connector **0.8.0** exposes **154 tools**, with portable skill **1.7.0**. It uses a SocialSuite Agent API key.
 
 ## Install
 
@@ -78,6 +78,8 @@ Use the capabilities reported by `socialsuite_whoami` to check feature availabil
 Read the [skill](skills/hermes/socialsuite/SKILL.md) for feature workflows. Super AI, Analytics and Reports preserve app permissions and private data boundaries through the same authenticated backend functions. They are not exposed through generic table access. Super AI worker and streaming endpoints are not MCP tools; poll request/thread tools instead. UI-only features such as chart layout, metric selection, Google sign-in and marketing navigation do not need MCP mutation tools. Saving campaign drafts does not publish to social networks.
 
 ## Upgrade
+
+Release 0.8.0 supports connected keyword datasets and names, discovers any available catalog metric rather than a fixed shortlist, and documents completing a draft from one user request through save, refresh/poll and verification. Agent API 0.7.1 advertises `reports-keyword-rows` and `reports-preview`; `reports_data` returns a resolved draft presentation without publishing. Install the complete skill 1.7.0 and restart MCP connections to refresh cached schemas. Existing keys remain valid. No database migration is required.
 
 Release 0.7.9 adds focused GA4 Organic Search and SE Ranking keyword reads to `socialsuite_analytics_dashboard`. The [Reports skill reference](skills/hermes/socialsuite/references/reports.md#seo-metrics-and-tables) covers live metric discovery, dated snapshots, and the lead inputs required for organic website attribution. The connector uses existing Agent API actions.
 
