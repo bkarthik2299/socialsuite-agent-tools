@@ -23,7 +23,7 @@ export const reportColumnSchema = z.object({
   width: z.number().min(80).max(600).optional(), currency: z.string().regex(/^[A-Z]{3}$/).optional(),
 });
 export const reportDatasetSchema = z.object({
-  id, grain: z.enum(['total', 'month', 'campaign', 'custom']),
+  id, grain: z.enum(['total', 'month', 'campaign', 'keyword', 'custom']),
   columns: z.array(reportColumnSchema).max(50),
   rows: z.array(z.object({ id, label: z.string().max(200), period: z.string().max(30), hidden: z.boolean().optional() })).max(5000),
   values: z.record(z.string().max(300), z.record(id, cell)), totals: z.boolean(),
@@ -32,7 +32,7 @@ export const reportDatasetSchema = z.object({
   layout: z.enum(['horizontal', 'transposed']).describe('Saved table orientation: horizontal or Vertical (stored as transposed). Preserve on edits. Image snapshots always use the vertical layout independently.').optional(),
   recordHeading: z.string().trim().max(100).optional(),
   rowLabels: z.record(
-    z.string().max(300).regex(/^(?:total$|month:\d{4}-\d{2}$|campaign:.+)/),
+    z.string().max(300).regex(/^(?:total$|month:\d{4}-\d{2}$|campaign:.+|keyword:.+)/),
     z.string().trim().min(1).max(200),
   ).refine(labels => Object.keys(labels).length <= 5000, 'Up to 5,000 row names are supported').optional(),
 });
@@ -65,15 +65,15 @@ export function registerReports(server: McpServer) {
   const client = { clientId: id };
   tool('reports_list', 'List DIY Reports in the active workspace, including client IDs, document metadata, revisions and saved share versions.', {}, true);
   tool('reports_get', 'Read the latest saved report, all datasets, current revision, versions and sharing state before editing. Use the saved revision as the base for edits. Share tokens are private.', report, true);
-  tool('reports_catalog', 'Discover live Reports bindings for this Analytics client. Use the returned mappingId, metric key, field, aggregation, currency and supported grains. Account totals such as GA4 sessions are all-channel metrics. Read GA4 Organic Search and SE Ranking keyword rows with analytics_dashboard detail for dated manual snapshots. Treat unavailable values as missing.', client, true);
+  tool('reports_catalog', 'Discover live Reports bindings for this Analytics client. Use the returned mappingId, metric key, field, aggregation, currency and supported grains. Use any returned metric with a compatible grain, including provider-specific metric keys; there is no fixed metric shortlist. SEO keyword bindings use keyword grain when advertised. Account totals such as GA4 sessions are all-channel metrics. Dashboard-only dimensions are not live Reports bindings. Treat unavailable values as missing.', client, true);
   tool('reports_defaults', 'Read agency/project branding defaults for a new DIY Report.', client, true);
   tool('reports_branding_assets', 'Read selectable logos from the client’s linked project Brand Guide. Otherwise use reports_upload_logo with a normal local image file.', client, true);
-  tool('reports_data', 'Read connected metric cache, job status and warnings for the saved report. Missing cache can queue existing Analytics sync; poll with a delay until ready. Manual values stay in reports_get datasets.', report, true);
+  tool('reports_data', 'Read connected metric cache, job status and warnings for the saved report. Returns the server-resolved draft presentation and reportRevision when reports-preview is advertised. Verify each requested KPI/table against that presentation, jobs and warnings. Missing cache can queue Analytics sync; poll with a delay until ready. Manual values stay in reports_get datasets. Reading never publishes.', report, true);
   tool('reports_version', 'Read one immutable shared report presentation, including its frozen branding, tables, KPI cards and charts.', { ...report, versionId: id }, true);
-  tool('reports_save', 'Create or atomically save a complete DIY Report. For a new report supply a new UUID reportId and revision -1. For edits, first call reports_get and use its exact revision. On a conflict, read the latest saved report and reapply the requested edits. Preserve existing blocks and data when a requested binding is unavailable. Use catalog metrics for live bindings and label any approved dashboard imports as dated manual snapshots. Keep website leads pending until lead-specific data supports the requested attribution. Preserve stable IDs and layout (horizontal or transposed). Share separately when requested. See the Reports skill reference for formulas, value keys and examples.', {
+  tool('reports_save', 'Create or atomically save a complete DIY Report. For a new report supply a new UUID reportId and revision -1. For edits, first call reports_get and use its exact revision. On a conflict, read the latest saved report and reapply the requested edits. Preserve existing blocks and data when a requested binding is unavailable. Use catalog metrics and supported grains for connected KPIs/tables across available sources. A request to create a report authorizes the draft save; carry through discovery, save, data polling and verification in the same task. Do not silently substitute manual snapshots for connected metrics. Keep website leads pending until lead-specific data supports the requested attribution. Preserve stable IDs and layout (horizontal or transposed). Share separately when requested. See the Reports skill reference for formulas, value keys and examples.', {
     ...report, ...client, revision: z.number().int().min(-1), document: reportDocumentSchema,
     datasets: z.array(reportDatasetSchema).max(50),
-  }, false, true);
+  }, false, false);
   tool('reports_refresh', 'Explicitly refresh connected Analytics for a saved DIY Report, preserving manual inputs. Uses existing provider cooldowns. Poll reports_data for job errors and readiness.', report);
   tool('reports_duplicate', 'Copy a report structure to a new period/client with new report, dataset and block IDs. Business values and commentary are cleared. Another-client copies also clear connected mappings and the client logo. Remap from the destination catalog before sharing.', { ...report, ...client, period: reportPeriodSchema });
   const shareInput = { ...report, acknowledgeMissing: z.boolean().optional() };
